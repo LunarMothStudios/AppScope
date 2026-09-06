@@ -403,3 +403,77 @@ Local writes: **no**. Network access: **none**.
   "name" : "aso_strategy"
 }
 ```
+
+## `refresh_app`
+
+Collect app metadata, optional Apple popularity, all tracked ranks and optional performance, then return a briefing. Checkpoints survive interruption. Automatically resumes the latest unfinished run from today; run_id resumes a specific run. The keyword selection is frozen per run. No scheduler or Apple writes.
+
+Local writes: **yes**. Network access: **possible**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `include_performance` | boolean | no | `true` |  |
+| `include_popularity` | boolean | no | `true` |  |
+| `max_steps` | integer | no | `120` | 1–120; Maximum steps this call; use smaller values for short host timeouts and resume |
+| `new_run` | boolean | no | `false` |  |
+| `run_id` | string | no | — | 1–36 characters; UUID from a previous refresh |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us",
+    "max_steps" : 120
+  },
+  "name" : "refresh_app"
+}
+```
+
+## `refresh_status`
+
+Read a saved refresh run's progress, failed steps and frozen keyword selection. A running status may describe an interrupted process; resume to recover.
+
+Local writes: **no**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `run_id` | string | no | — | 1–36 characters; Optional run UUID; latest run by default |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us"
+  },
+  "name" : "refresh_status"
+}
+```
+
+## `keyword_trends`
+
+Compare today's observed rank with an exact prior UTC date, summarize daily coverage and recurring top-three competitors, and return meaningful change candidates. Never fills missing days/ranks. Uses only saved iTunes observations at depth 200. The host decides notifications.
+
+Local writes: **no**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `days` | integer | no | `7` | 7–30; Window days, usually 7 or 30 |
+| `minimum_change` | integer | no | `3` | 1–200; Minimum position change to flag; top-10 crossings also count |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us",
+    "days" : 7,
+    "minimum_change" : 3
+  },
+  "name" : "keyword_trends"
+}
+```

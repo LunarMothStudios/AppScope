@@ -113,6 +113,37 @@ public actor Database {
         value["observed_at"].text, value.jsonText(),
       ])
   }
+  /// One latest observation per UTC date, with source and depth fixed before grouping.
+  public func dailySnapshots(
+    app: String, country: String, keyword: String, start: String, end: String
+  ) throws -> [JSON] {
+    try run(
+      """
+      SELECT body FROM (
+        SELECT body, observed, ROW_NUMBER() OVER (
+          PARTITION BY substr(observed,1,10) ORDER BY observed DESC,id DESC
+        ) AS day_row FROM snapshots
+        WHERE app=? AND country=? AND keyword=? AND observed>=? AND observed<?
+          AND json_extract(body,'$.source')='itunes_search'
+          AND json_extract(body,'$.requested_limit')=200
+      ) WHERE day_row=1 ORDER BY observed
+      """, [app, country, keyword, start + "T00:00:00Z", dateOffset(end, days: 1) + "T00:00:00Z"]
+    ).map { try JSON.decode(Data($0[0].utf8)) }
+  }
+  public func putIfAbsent(_ kind: String, _ key: String, _ value: JSON) throws -> JSON {
+    _ = try run(
+      "INSERT INTO records(kind,key,body) VALUES(?,?,?) ON CONFLICT(kind,key) DO NOTHING",
+      [kind, key, value.jsonText()])
+    return try get(kind, key)!
+  }
+  public func replaceRevision(_ kind: String, _ key: String, revision: Int, value: JSON) throws {
+    _ = try run(
+      "UPDATE records SET body=? WHERE kind=? AND key=? AND json_extract(body,'$.revision')=?",
+      [value.jsonText(), kind, key, String(revision)])
+    guard sqlite3_changes(handle) == 1 else {
+      throw ScopeError("revision_conflict", "This record changed. Read it again before updating.")
+    }
+  }
   public func history(app: String, country: String, keyword: String, limit: Int = 30) throws
     -> [JSON]
   {

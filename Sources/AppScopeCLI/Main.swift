@@ -68,7 +68,20 @@ import MCP
       await server.withMethodHandler(ListTools.self) { _ in .init(tools: ToolCatalog.all) }
       await server.withMethodHandler(CallTool.self) { params in
         do {
-          let result = try await scope.call(params.name, params.arguments ?? [:])
+          let progress: RefreshProgress?
+          if let token = params._meta?.progressToken {
+            progress = { completed, total, message in
+              try? await server.notify(
+                ProgressNotification.message(
+                  .init(
+                    progressToken: token, progress: Double(completed), total: Double(total),
+                    message: message)))
+            }
+          } else {
+            progress = nil
+          }
+          let result = try await scope.call(
+            params.name, params.arguments ?? [:], progress: progress)
           return try .init(
             content: [.text(text: try result.jsonText(), annotations: nil, _meta: nil)],
             structuredContent: result, isError: false)

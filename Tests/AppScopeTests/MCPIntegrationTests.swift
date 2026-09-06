@@ -4,6 +4,15 @@ import Testing
 
 @testable import AppScopeCore
 
+actor ProgressRecorder {
+  var values: [Double] = []
+  var tokens: [ProgressToken] = []
+  func record(_ params: ProgressNotification.Parameters) {
+    values.append(params.progress)
+    tokens.append(params.progressToken)
+  }
+}
+
 @Test func realMCPProcessListsCallsAndRejectsInvalidTools() async throws {
   let dir = try scratch()
   defer { try? FileManager.default.removeItem(at: dir) }
@@ -48,5 +57,42 @@ import Testing
   let (_, rejected) = try await client.callTool(
     name: "analyze_keyword", arguments: ["app_id": "12", "keyword": "budget", "limit": -1])
   #expect(rejected == true)
+  // Resume a saved run through the real stdio boundary without live provider traffic.
+  let database = try Database(directory: dir)
+  let runID = UUID().uuidString.lowercased()
+  try await database.saveSnapshot([
+    "app_id": "12", "country": "us", "keyword": "budget", "rank": 2,
+    "status": "found", "observed_at": .string(timestamp()), "source": "itunes_search",
+    "requested_limit": 200, "competitors": [],
+  ])
+  try await database.put(
+    "refresh_run", runID,
+    [
+      "run_id": .string(runID), "app_id": "12", "country": "us",
+      "day": .string(day()), "status": "paused", "include_popularity": true,
+      "include_performance": true,
+      "keywords": ["budget"],
+      "steps": [
+        ["kind": "profile", "status": "succeeded"],
+        ["kind": "popularity", "status": "pending", "seeds": ["budget"]],
+        ["kind": "ranking", "keyword": "budget", "status": "pending"],
+        ["kind": "performance", "status": "pending"],
+      ],
+    ])
+  try await database.put("refresh_latest", "12|us", ["run_id": .string(runID)])
+  let recorder = ProgressRecorder()
+  await client.onNotification(ProgressNotification.self) { message in
+    await recorder.record(message.params)
+  }
+  let (_, refreshFailed) = try await client.callTool(
+    name: "refresh_app", arguments: ["app_id": "12", "run_id": .string(runID)],
+    meta: Metadata(progressToken: .string("refresh-test")))
+  #expect(refreshFailed != true)
+  for _ in 0..<30 {
+    if await recorder.values.count == 3 { break }
+    try await Task.sleep(for: .milliseconds(10))
+  }
+  #expect(await recorder.values == [2, 3, 4])
+  #expect(await recorder.tokens.allSatisfy { $0 == .string("refresh-test") })
   await client.disconnect()
 }

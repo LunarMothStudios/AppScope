@@ -132,6 +132,34 @@ public enum ToolCatalog {
       "aso_strategy",
       "Return app/audience context, saved evidence and provisional ASO experiments with success measures. Uses cached data; collect fresh observations first. The agent reasons over the evidence; no LLM API key needed.",
       common, required: ["app_id"], external: false),
+    tool(
+      "refresh_app",
+      "Collect app metadata, optional Apple popularity, all tracked ranks and optional performance, then return a briefing. Checkpoints survive interruption. Automatically resumes the latest unfinished run from today; run_id resumes a specific run. The keyword selection is frozen per run. No scheduler or Apple writes.",
+      fields([
+        "run_id": string("UUID from a previous refresh", max: 36),
+        "new_run": ["type": "boolean", "default": false],
+        "include_popularity": ["type": "boolean", "default": true],
+        "include_performance": ["type": "boolean", "default": true],
+        "max_steps": integer(
+          "Maximum steps this call; use smaller values for short host timeouts and resume", min: 1,
+          max: 120, default: 120),
+      ]),
+      required: ["app_id"], localWrite: true),
+    tool(
+      "refresh_status",
+      "Read a saved refresh run's progress, failed steps and frozen keyword selection. A running status may describe an interrupted process; resume to recover.",
+      fields(["run_id": string("Optional run UUID; latest run by default", max: 36)]),
+      required: ["app_id"], external: false),
+    tool(
+      "keyword_trends",
+      "Compare today's observed rank with an exact prior UTC date, summarize daily coverage and recurring top-three competitors, and return meaningful change candidates. Never fills missing days/ranks. Uses only saved iTunes observations at depth 200. The host decides notifications.",
+      fields([
+        "days": integer("Window days, usually 7 or 30", min: 7, max: 30, default: 7),
+        "minimum_change": integer(
+          "Minimum position change to flag; top-10 crossings also count", min: 1, max: 200,
+          default: 3),
+      ]),
+      required: ["app_id"], external: false),
   ]
   public static func validate(_ name: String, _ args: [String: JSON]) throws {
     guard let tool = all.first(where: { $0.name == name }) else {

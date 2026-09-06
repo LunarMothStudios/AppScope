@@ -35,9 +35,18 @@ extension Value {
     String(decoding: try encoded(pretty: pretty), as: UTF8.self)
   }
   public static func strings(_ values: [String]) -> Value { .array(values.map(Value.string)) }
+  public func setting(_ fields: [String: Value]) -> Value {
+    .object((objectValue ?? [:]).merging(fields) { _, new in new })
+  }
 }
 
 public enum Validate {
+  public static func identifier(_ value: String) throws -> String {
+    guard let id = UUID(uuidString: value) else {
+      throw ScopeError("invalid_identifier", "Use the UUID returned by AppScope.")
+    }
+    return id.uuidString.lowercased()
+  }
   public static func appID(_ value: String) throws -> String {
     guard value.range(of: "^[0-9]{1,20}$", options: .regularExpression) != nil else {
       throw ScopeError("invalid_app_id", "Use the numeric App Store app ID.")

@@ -639,5 +639,143 @@
       "type" : "object"
     },
     "name" : "aso_strategy"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : false,
+      "openWorldHint" : true,
+      "readOnlyHint" : false
+    },
+    "description" : "Collect app metadata, optional Apple popularity, all tracked ranks and optional performance, then return a briefing. Checkpoints survive interruption. Automatically resumes the latest unfinished run from today; run_id resumes a specific run. The keyword selection is frozen per run. No scheduler or Apple writes.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "include_performance" : {
+          "default" : true,
+          "type" : "boolean"
+        },
+        "include_popularity" : {
+          "default" : true,
+          "type" : "boolean"
+        },
+        "max_steps" : {
+          "default" : 120,
+          "description" : "Maximum steps this call; use smaller values for short host timeouts and resume",
+          "maximum" : 120,
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "new_run" : {
+          "default" : false,
+          "type" : "boolean"
+        },
+        "run_id" : {
+          "description" : "UUID from a previous refresh",
+          "maxLength" : 36,
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "app_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "refresh_app"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : true,
+      "openWorldHint" : false,
+      "readOnlyHint" : true
+    },
+    "description" : "Read a saved refresh run's progress, failed steps and frozen keyword selection. A running status may describe an interrupted process; resume to recover.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "run_id" : {
+          "description" : "Optional run UUID; latest run by default",
+          "maxLength" : 36,
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "app_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "refresh_status"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : true,
+      "openWorldHint" : false,
+      "readOnlyHint" : true
+    },
+    "description" : "Compare today's observed rank with an exact prior UTC date, summarize daily coverage and recurring top-three competitors, and return meaningful change candidates. Never fills missing days/ranks. Uses only saved iTunes observations at depth 200. The host decides notifications.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "days" : {
+          "default" : 7,
+          "description" : "Window days, usually 7 or 30",
+          "maximum" : 30,
+          "minimum" : 7,
+          "type" : "integer"
+        },
+        "minimum_change" : {
+          "default" : 3,
+          "description" : "Minimum position change to flag; top-10 crossings also count",
+          "maximum" : 200,
+          "minimum" : 1,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "app_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "keyword_trends"
   }
 ]
