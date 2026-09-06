@@ -1,4 +1,64 @@
-# Local validation — 2026-09-06
+# Local validation
+
+## v0.2.0 — 2026-09-06
+
+Verified locally on an Apple Silicon Mac with Swift 6.3.3 and the Xcode macOS SDK.
+The installed executable reports `0.2.0` and exposes 24 MCP tools.
+
+- **35 automated tests passed.** Coverage includes durable refresh recovery,
+  cancellation and lock release, fixed keyword selections, expired checkpoints,
+  daily observation selection, recurring competitor changes, experiment creation
+  retries and revision conflicts, preserved baselines, later analytics corrections,
+  credential setup, and independent connection-check failures.
+- The real Swift MCP client test passed against both the development executable
+  and the installed universal executable. It discovered all 24 tools, resumed a
+  saved refresh, and received increasing progress notifications with its supplied
+  progress token.
+- An installed CLI process refreshed a live public app and saved a paused
+  checkpoint after the profile step. A new process resumed the same run and
+  completed two keyword observations. Metadata and rankings were reported fresh;
+  unconfigured popularity and performance sources remained explicit. The overall
+  report was partial, as expected without account data. This check used a separate
+  local data directory and no account credentials.
+- The same live workflow read keyword trends and recorded a synthetic local
+  experiment. Its report remained `collecting`, with unavailable comparison
+  changes set to null. No App Store listing was changed. Seven-/thirty-day movement
+  and full experiment comparisons were tested with dated fixtures; this new live
+  history has not accumulated those periods yet.
+- A focused failing regression exposed an analytics coverage gap: report dates
+  alone did not establish matching country rows or values for each metric. The
+  fix adds that coverage and prevents incomplete periods from producing a
+  numerical experiment comparison or a fresh performance classification.
+- Guided setup was exercised through a real pseudo-terminal: successful save,
+  cancellation preserving configuration, and refusal without a terminal.
+  Synthetic key generation and configuration tests verified private permissions
+  and rejection of invalid keys or accidental key replacement.
+- The universal archive built successfully. Both `arm64` and `x86_64` slices
+  declare macOS 14.0 and link to system runtime libraries. Its checksum and strict
+  ad-hoc signature verification passed. Installation preserved existing config;
+  only the ARM slice was executed on this Mac.
+- Generated tool documentation, all 24 synthetic examples, fenced JSON and
+  relative documentation links passed validation, including the extracted
+  handbook. Swift format lint, shell syntax and Git whitespace checks passed.
+- The archive includes a version marker and clean-commit provenance in
+  `BUILD.json`. Homebrew formula generation and Ruby syntax checks passed with an
+  explicitly synthetic release URL; mismatched filenames were rejected. This is
+  not a public tap installation test.
+- Notarization result checks accepted `Accepted` and rejected invalid, pending or
+  missing statuses. Requiring notarization without signing prerequisites failed
+  before building. No actual signing submission was made.
+
+**Remaining qualification:** live Apple Ads access, App Store Connect imports
+and reconciliation, physical-device search comparisons, Intel runtime, and a
+clean macOS 14 download/install. No Developer ID Application identity was available
+for this build, so the archive is ad-hoc signed and **not notarized**. GitHub
+publication and a real Homebrew tap install remain pending. Automated fixtures,
+configuration validation and a successful public search do not establish those
+results. No Hex schedule was enabled.
+
+The following sections preserve the earlier v0.1 verification record.
+
+## v0.1.0 — 2026-09-06
 
 Verified on an Apple Silicon Mac with Swift 6.3.3 and the Xcode macOS SDK.
 
