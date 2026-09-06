@@ -1,0 +1,24 @@
+name: Build and test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: swift --version
+      - name: Tests including real MCP subprocess
+        run: swift test
+      - name: Package both Mac architectures
+        run: ./scripts/package-macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appscope-macos
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
