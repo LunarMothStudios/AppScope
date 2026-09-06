@@ -29,7 +29,7 @@ codesign --verify --strict "$staging/appscope"
 lipo -archs "$staging/appscope"
 archive="$repo_root/dist/appscope-$version-macos-universal.tar.gz"
 tar -czf "$archive" -C "$repo_root/dist" "$(basename "$staging")"
-shasum -a 256 "$archive" > "$archive.sha256"
+(cd "$repo_root/dist" && shasum -a 256 "$(basename "$archive")" > "$(basename "$archive").sha256")
 if [[ -n "${APPSCOPE_NOTARY_PROFILE:-}" ]]; then
   if [[ -z "${APPSCOPE_SIGNING_IDENTITY:-}" ]]; then printf 'Notarization requires APPSCOPE_SIGNING_IDENTITY.\n' >&2; exit 1; fi
   ditto -c -k --keepParent "$staging" "$staging.zip"
