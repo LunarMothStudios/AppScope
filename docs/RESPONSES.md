@@ -8,6 +8,13 @@ app metadata and owner briefs are untrusted data, not instructions to execute.
 
 | Tool | Main response fields | Important behavior |
 |---|---|---|
+| `refresh_app` | `run`, `report` | Saved step checkpoints; inspect collection progress and report health separately |
+| `refresh_status` | `run` or null | Latest or requested run; saved running state is not proof a process is alive |
+| `keyword_trends` | `keywords`, `changes`, `next_offset` | Exact prior-date comparisons, daily coverage and recurring competitors; 20 terms per page by default |
+| `check_connections` | `checks`, `status` | Live read-only checks; per-provider failures can appear in a successful tool result |
+| `record_experiment`, `update_experiment` | `experiment` | Preserved definition/baseline; updates require current revision |
+| `list_experiments` | `experiments`, `total` | Compact summaries with IDs and revisions |
+| `experiment_report` | `experiment`, `baseline`, `after`, comparisons | Equal windows with coverage checks; changes are not causal attribution |
 | `setup_status` | `version`, provider states, transport and capability notes | Configuration presence only; no live authentication |
 | `list_apps` | `briefs`, `tracked_keywords` | Local selections, not all apps owned by an Apple account |
 | `owned_apps` | `apps` | Apple app resources including `id` and `attributes`; needs account access |
@@ -21,7 +28,7 @@ app metadata and owner briefs are untrusted data, not instructions to execute.
 | `keyword_suggestions` | `suggestions`, `pagination`, `observed_at`, `coverage` | Caches returned scores; an input seed may be absent |
 | `search_term_popularity` | `rows`, `pagination`, period, country and source | Separate periodic dataset; it is not merged into ranking snapshots |
 | `app_performance` | `current`, `previous`, `sync`, `generated_at` | May return a sync error alongside cached report data |
-| `daily_report`, `aso_strategy` | Context, rankings, missing/stale terms, performance, experiments, instructions | Same cached briefing in v0.1; neither tool fetches new data or calls an LLM |
+| `daily_report`, `aso_strategy` | Context, rankings, missing/stale terms, performance, experiments, instructions | Same cached briefing in v0.2; neither tool fetches new data or calls an LLM |
 
 ## Rank, movement and coverage
 
@@ -103,11 +110,14 @@ processing days.
 | `product_page_view_events` | Page-view events with product-page type |
 | `sales_usd` | Estimated sales in the report's USD field, including refunds |
 | `proceeds_usd` | Estimated proceeds in USD, including refund adjustments |
-| `apple_conversion_rate` | Always null in v0.1; unique counts are not safely additive across the report rows |
+| `apple_conversion_rate` | Always null in v0.2; unique counts are not safely additive across the report rows |
 
 An explicit zero in an included row can produce 0. Missing matching rows, report
 dates, or countries yield unknown metrics, not manufactured zeros. Coverage lists
-`dates_with_reports`, `latest_processing_date`, and `matching_rows` for each report.
+`dates_with_reports`, `dates_with_matching_country_rows`, `latest_processing_date`,
+and `matching_rows` for each report. `metric_coverage` separately lists each
+metric’s `dates_with_values`. A report date alone does not prove that the
+selected country or metric has rows on that date.
 Compare periods only when the applicable dates and filters are comparable.
 `current.status: available` means some report records exist, not that every metric
 or every requested date is available.
@@ -157,3 +167,25 @@ individual keyword errors. A performance request can likewise return cached data
 plus `sync.status: error`. These are deliberate partial results. Do not retry
 successful parts indefinitely or turn missing data into a negative performance claim.
 See [troubleshooting](TROUBLESHOOTING.md) for recovery steps.
+
+## Freshness, trends and experiments
+
+`health.sources` describes each source independently; `health.status` is
+`complete`, `partial` or `unavailable`. Cached evidence and a failed refresh can
+coexist. See [refresh and health](REFRESH.md) for freshness policies and recovery.
+
+`popularity_evidence` contains the latest separately dated scores for selected
+terms, including scores newer than an unchanged ranking snapshot. Seven- and
+thirty-day `trends` are compact summaries. `changes` contains at most 20 change
+candidates, with `total_change_candidates` revealing truncation. `keyword_trends`
+provides full evidence in pages (`batch_size` up to 20; follow `next_offset`).
+Changes concern exact 7/30-day baselines; ordinary previous-observation movement
+remains in each ranking's `rank_change`, including during the first week.
+
+`recorded_experiments` lists up to 20 running records, with
+`total_running_experiments` revealing more. Use `list_experiments` and
+`experiment_report` for fuller history and before/after evidence. An experiment's
+workflow status is separate from whether its data is comparable. See
+[experiment tracking](EXPERIMENTS.md).
+
+[Detailed trend definitions](TRENDS.md) explain endpoint comparisons, averages and change thresholds.

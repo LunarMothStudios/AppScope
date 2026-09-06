@@ -8,6 +8,21 @@ func searchFixture() -> JSON {
   ["resultCount": 1, "results": [["trackId": 12, "trackName": "Example", "userRatingCount": 20]]]
 }
 
+@Test func rankingCacheCannotCrossUTCDateOrReuseFutureOrDifferentSource() {
+  let now = ISO8601DateFormatter().date(from: "2026-09-06T00:05:00Z")!
+  let row: JSON = [
+    "source": "itunes_search", "requested_limit": 200, "observed_at": "2026-09-05T23:59:00Z",
+  ]
+  #expect(!Ranking.canReuse(row, limit: 200, now: now))
+  let current = row.setting(["observed_at": "2026-09-06T00:01:00Z"])
+  #expect(Ranking.canReuse(current, limit: 200, now: now))
+  #expect(!Ranking.canReuse(current, limit: 20, now: now))
+  #expect(!Ranking.canReuse(current.setting(["source": "another_provider"]), limit: 200, now: now))
+  #expect(
+    !Ranking.canReuse(
+      current.setting(["observed_at": "2026-09-06T00:06:00Z"]), limit: 200, now: now))
+}
+
 @Test func refreshAppResumesOnlyFailedStepsAcrossServiceInstances() async throws {
   let dir = try scratch()
   defer { try? FileManager.default.removeItem(at: dir) }

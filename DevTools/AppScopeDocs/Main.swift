@@ -36,8 +36,11 @@ import MCP
       for key in ["keywords", "seeds"] {
         for keyword in args[key]?.list ?? [] { _ = try Validate.keyword(keyword.text) }
       }
-      for key in ["start", "end"] {
+      for key in ["start", "end", "start_date"] {
         if let date = args[key]?.stringValue { _ = try Validate.date(date) }
+      }
+      for key in ["run_id", "experiment_id"] {
+        if let id = args[key]?.stringValue { _ = try Validate.identifier(id) }
       }
     }
 
@@ -101,6 +104,9 @@ import MCP
             limits.append("Each item: 1–\(itemMax) characters")
           }
           if !schema["description"].text.isEmpty { limits.append(schema["description"].text) }
+          if let choices = schema["enum"].arrayValue {
+            limits.append("Choices: " + choices.map(\.text).joined(separator: ", "))
+          }
           let type = schema["type"].text == "array" ? "string array" : schema["type"].text
           let fallback = key == "country" ? "`us`" : "—"
           let defaultText =

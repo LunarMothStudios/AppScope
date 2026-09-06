@@ -9,8 +9,46 @@ AppScope service or paste them into an agent conversation.
 | Apple Ads | Keyword suggestions and available relative popularity | API Account Read Only |
 | App Store Connect | Owned-app listing and available standard analytics | Team API key; Sales and Reports for report downloads |
 
-The Apple keys are separate. AppScope v0.1 supports App Store Connect **team keys**
+The Apple keys are separate. AppScope v0.2 supports App Store Connect **team keys**
 with an issuer ID, not the distinct individual-key authentication flow.
+
+## Guided setup
+
+Run these in Terminal, not through an MCP tool or a piped agent prompt:
+
+```sh
+appscope configure apple-ads
+appscope configure app-store-connect
+```
+
+Configure only the provider you need. The guided flow asks for identifiers and an
+existing private-key **path**, never private-key bytes. Return preserves an
+existing field; Ctrl-D cancels without saving. It checks key format/permissions,
+preserves the other provider, and atomically saves a 0600 config file. Restart
+the MCP connection afterward. Manual editing remains supported below.
+
+If you need an Apple Ads key pair before creating its API client:
+
+```sh
+appscope keygen apple-ads
+```
+
+This creates `apple-ads-private.p8` and `apple-ads-public.pem` in your data
+directory, prints only the public key and paths, and refuses to replace existing
+key files. Give Apple the public key. App Store Connect keys must be issued by
+Apple through its account portal; this command does not create those.
+
+After configuration, use your verified app ID for an optional read-only check:
+
+```sh
+appscope doctor --live 1234567890
+```
+
+The ID is fictional. `check_connections` exposes the same check through MCP with
+an optional country. It reports each provider independently, skips unconfigured
+providers and withholds tokens/raw provider details. It checks app access and
+ongoing report-request status, not successful report downloads or reconciled
+analytics totals. A partial result can still exit successfully; inspect `checks`.
 
 ## Prepare the private configuration
 
@@ -62,7 +100,7 @@ AppScope connection after editing it. It does not load `.env` files.
 
 Follow [Apple's account/API setup](https://ads.apple.com/maps/apple-ads/help/campaigns/0022-use-apple-ads-platform-api)
 for the current account screens and client creation requirements. AppScope does
-not include an account-discovery or key-generation command.
+not include Apple account administration; use `keygen apple-ads` for local keys.
 
 Restart AppScope, then validate with a small research call for your actual app:
 

@@ -3,6 +3,266 @@
     "annotations" : {
       "destructiveHint" : false,
       "idempotentHint" : true,
+      "openWorldHint" : true,
+      "readOnlyHint" : true
+    },
+    "description" : "Make bounded read-only live provider checks for this app. Unconfigured providers are skipped. Tests public lookup, Apple Ads suggestions and App Store Connect app/report-request access. Does not enable or import reports, expose credentials or persist results.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "app_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "check_connections"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : false,
+      "openWorldHint" : false,
+      "readOnlyHint" : false
+    },
+    "description" : "Record an ASO change, hypothesis, UTC release date, comparison window and up to 20 terms. Saves a baseline from existing local evidence; does not collect or publish. Supply a stable experiment_id UUID for safe retries; reusing it with different details is rejected.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "change" : {
+          "description" : "What changed in the listing or release",
+          "maxLength" : 4000,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "experiment_id" : {
+          "description" : "Experiment UUID returned by AppScope",
+          "maxLength" : 36,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "hypothesis" : {
+          "description" : "Expected mechanism, not a promised outcome",
+          "maxLength" : 2000,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "keywords" : {
+          "description" : "Terms measured independently of the tracked selection",
+          "items" : {
+            "description" : "Text",
+            "maxLength" : 500,
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "maxItems" : 20,
+          "type" : "array"
+        },
+        "notes" : {
+          "description" : "Other releases, campaigns and caveats",
+          "maxLength" : 4000,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "start_date" : {
+          "description" : "UTC date the change began, YYYY-MM-DD",
+          "maxLength" : 10,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "title" : {
+          "description" : "Short experiment title",
+          "maxLength" : 200,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "window_days" : {
+          "default" : 14,
+          "description" : "Days in each before/after window",
+          "maximum" : 30,
+          "minimum" : 7,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "app_id",
+        "title",
+        "hypothesis",
+        "change",
+        "start_date",
+        "keywords"
+      ],
+      "type" : "object"
+    },
+    "name" : "record_experiment"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : true,
+      "openWorldHint" : false,
+      "readOnlyHint" : true
+    },
+    "description" : "List local experiment summaries with IDs and revisions, newest first.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "limit" : {
+          "default" : 20,
+          "description" : "Maximum summaries",
+          "maximum" : 100,
+          "minimum" : 1,
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "app_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "list_experiments"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : true,
+      "idempotentHint" : false,
+      "openWorldHint" : false,
+      "readOnlyHint" : false
+    },
+    "description" : "Update an experiment's status or notes locally. Requires its current revision to prevent overwriting another update. Original definition and captured baseline remain unchanged.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "expected_revision" : {
+          "default" : 1,
+          "description" : "Current revision from the record",
+          "maximum" : 1000000,
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "experiment_id" : {
+          "description" : "Experiment UUID returned by AppScope",
+          "maxLength" : 36,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "notes" : {
+          "description" : "Replacement notes; original change definition is preserved",
+          "maxLength" : 4000,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "status" : {
+          "description" : "running, completed, or stopped",
+          "enum" : [
+            "running",
+            "completed",
+            "stopped"
+          ],
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "app_id",
+        "experiment_id",
+        "expected_revision"
+      ],
+      "type" : "object"
+    },
+    "name" : "update_experiment"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : true,
+      "openWorldHint" : false,
+      "readOnlyHint" : true
+    },
+    "description" : "Compare an experiment's equal before/after windows using saved daily ranks and analytics. Preserves the original baseline alongside recalculated evidence. Missing coverage produces null differences. Completing an experiment does not prove success or causation.",
+    "inputSchema" : {
+      "additionalProperties" : false,
+      "properties" : {
+        "app_id" : {
+          "description" : "Numeric App Store app ID",
+          "maxLength" : 20,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "country" : {
+          "description" : "Two-letter ISO storefront country; defaults to us",
+          "maxLength" : 2,
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "experiment_id" : {
+          "description" : "Experiment UUID returned by AppScope",
+          "maxLength" : 36,
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "app_id",
+        "experiment_id"
+      ],
+      "type" : "object"
+    },
+    "name" : "experiment_report"
+  },
+  {
+    "annotations" : {
+      "destructiveHint" : false,
+      "idempotentHint" : true,
       "openWorldHint" : false,
       "readOnlyHint" : true
     },
@@ -750,6 +1010,13 @@
           "minLength" : 1,
           "type" : "string"
         },
+        "batch_size" : {
+          "default" : 20,
+          "description" : "Keywords per page",
+          "maximum" : 20,
+          "minimum" : 1,
+          "type" : "integer"
+        },
         "country" : {
           "description" : "Two-letter ISO storefront country; defaults to us",
           "maxLength" : 2,
@@ -768,6 +1035,13 @@
           "description" : "Minimum position change to flag; top-10 crossings also count",
           "maximum" : 200,
           "minimum" : 1,
+          "type" : "integer"
+        },
+        "offset" : {
+          "default" : 0,
+          "description" : "Keyword page offset",
+          "maximum" : 100,
+          "minimum" : 0,
           "type" : "integer"
         }
       },

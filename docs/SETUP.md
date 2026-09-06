@@ -40,12 +40,12 @@ data directory. Use a writable prefix without `sudo`.
 
 Public download URLs are not available yet. Once a release is published, download
 its matching `.tar.gz` archive and `.sha256` file from the same official release.
-In that download directory, the v0.1.0 filenames would be:
+In that download directory, the v0.2.0 filenames would be:
 
 ```sh
-shasum -a 256 -c appscope-0.1.0-macos-universal.tar.gz.sha256
-tar -xzf appscope-0.1.0-macos-universal.tar.gz
-cd appscope-0.1.0-macos-universal
+shasum -a 256 -c appscope-0.2.0-macos-universal.tar.gz.sha256
+tar -xzf appscope-0.2.0-macos-universal.tar.gz
+cd appscope-0.2.0-macos-universal
 ./install.sh
 "$HOME/.local/bin/appscope" setup
 "$HOME/.local/bin/appscope" doctor
@@ -84,7 +84,7 @@ Some hosts use a settings form or another file format: the executable and `serve
 argument are the same. Consult that host's current MCP instructions for where to
 put them. Never add credentials or private-key contents to the connection JSON.
 
-Restart the connection, confirm that it exposes 16 tools, and call `setup_status`.
+Restart the connection, confirm that it exposes 24 tools, and call `setup_status`.
 `configured_unverified` means required credential strings are present, not that
 Apple access was checked. Start with `search_apps` for a public live check.
 

@@ -4,6 +4,31 @@ Changes to AppScope are recorded here. Version numbers describe the executable,
 MCP tools and data behavior together. Preview releases may change these contracts;
 check release notes before updating and back up private local data.
 
+## 0.2.0 — local preview, not yet published
+
+- Added `refresh_app` and `refresh_status`: ordered collection, durable checkpoints,
+  fixed keyword selections, resumable bounded requests, per-app/country OS locks
+  and optional MCP progress notifications.
+- Added report health by source, separately dated latest popularity, compact
+  7/30-day trends, paginated detailed comparisons and recurring competitor changes.
+- Added experiment recording, listing, revision-checked updates and equal-window
+  reports. Original baselines remain preserved when later analytics corrections arrive.
+- Tightened comparison coverage per date, country and individual metric. Missing
+  country/metric days cannot become a comparable performance decline.
+- Added guided Terminal credential configuration, safe local Apple Ads key
+  generation, and read-only `doctor --live` / `check_connections` diagnostics.
+- Increased MCP surface to 24 tools; documented all inputs, responses and workflows.
+- Release archives include version/source provenance and fresh staging. Homebrew
+  formulas verify archive versions. Public packaging can require credentials and
+  rejects notarization results other than Accepted.
+
+Existing v0.1 data is retained; new features add record kinds and response fields
+without a destructive SQLite migration. Run `app_performance` with `sync: false`
+to recalculate new coverage fields for previously cached analytics. Old clients
+should tolerate added JSON fields. No automatic scheduler or Apple listing/ad
+write capability was added. Public release, notarization and live account/device
+qualification remain separate from local build/tests.
+
 ## 0.1.0 — local preview, not yet published
 
 - Native Swift stdio MCP server with 16 tools and matching direct CLI calls.

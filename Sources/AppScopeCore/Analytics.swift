@@ -134,6 +134,7 @@ public enum Reports {
       "start": .string(start), "end": .string(end),
     ]
     var metrics: [String: JSON] = [:]
+    var metricCoverage: [String: JSON] = [:]
     var coverage: [String: JSON] = [:]
     for report in names {
       let batches = selected.filter { $0["report"].text == report }
@@ -144,35 +145,45 @@ public enum Reports {
         "dates_with_reports": .strings(batches.map { $0["date"].text }.sorted()),
         "latest_processing_date": batches.map { $0["processing_date"].text }.max().map(JSON.string)
           ?? .null, "matching_rows": .int(rows.count),
+        "dates_with_matching_country_rows": .strings(Set(rows.map { $0["Date"].text }).sorted()),
       ]
-      func sum(_ field: String, where predicate: (JSON) -> Bool = { _ in true }) -> JSON {
+      func sum(_ field: String, metric: String, where predicate: (JSON) -> Bool = { _ in true })
+        -> JSON
+      {
         let matching = rows.filter(predicate)
+        metricCoverage[metric] = [
+          "report": .string(report),
+          "dates_with_values": .strings(
+            Set(matching.filter { Double($0[field].text) != nil }.map { $0["Date"].text }).sorted()),
+          "matching_rows": .int(matching.count),
+        ]
         guard !batches.isEmpty, !matching.isEmpty else { return .null }
         return .double(matching.reduce(0) { $0 + (Double($1[field].text) ?? 0) })
       }
       if report == names[0] {
-        metrics["first_time_downloads"] = sum("Counts") {
+        metrics["first_time_downloads"] = sum("Counts", metric: "first_time_downloads") {
           $0["Download Type"].text.lowercased() == "first-time download"
         }
-        metrics["redownloads"] = sum("Counts") {
+        metrics["redownloads"] = sum("Counts", metric: "redownloads") {
           $0["Download Type"].text.lowercased() == "redownload"
         }
       } else if report == names[1] {
-        metrics["impression_events"] = sum("Counts") {
+        metrics["impression_events"] = sum("Counts", metric: "impression_events") {
           $0["Event"].text.lowercased() == "impression"
         }
-        metrics["product_page_view_events"] = sum("Counts") {
+        metrics["product_page_view_events"] = sum("Counts", metric: "product_page_view_events") {
           $0["Event"].text.lowercased() == "page view"
             && $0["Page Type"].text.lowercased() == "product page"
         }
       } else {
-        metrics["sales_usd"] = sum("Sales in USD")
-        metrics["proceeds_usd"] = sum("Proceeds in USD")
+        metrics["sales_usd"] = sum("Sales in USD", metric: "sales_usd")
+        metrics["proceeds_usd"] = sum("Proceeds in USD", metric: "proceeds_usd")
       }
     }
     metrics["apple_conversion_rate"] = .null
     output["metrics"] = .object(metrics)
     output["coverage"] = .object(coverage)
+    output["metric_coverage"] = .object(metricCoverage)
     output["status"] = .string(selected.isEmpty ? "no_data" : "available")
     output["caveats"] = .strings([
       "Missing dates or country rows are unknown, not zero. Totals cover only listed report dates.",

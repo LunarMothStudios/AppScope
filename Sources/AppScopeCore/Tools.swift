@@ -39,7 +39,49 @@ public enum ToolCatalog {
   static func fields(_ extra: [String: JSON]) -> [String: JSON] {
     common.merging(extra) { _, new in new }
   }
+  static let experimentID = string("Experiment UUID returned by AppScope", max: 36)
   public static let all: [Tool] = [
+    tool(
+      "check_connections",
+      "Make bounded read-only live provider checks for this app. Unconfigured providers are skipped. Tests public lookup, Apple Ads suggestions and App Store Connect app/report-request access. Does not enable or import reports, expose credentials or persist results.",
+      common, required: ["app_id"]),
+    tool(
+      "record_experiment",
+      "Record an ASO change, hypothesis, UTC release date, comparison window and up to 20 terms. Saves a baseline from existing local evidence; does not collect or publish. Supply a stable experiment_id UUID for safe retries; reusing it with different details is rejected.",
+      fields([
+        "experiment_id": experimentID, "title": string("Short experiment title", max: 200),
+        "hypothesis": string("Expected mechanism, not a promised outcome", max: 2000),
+        "change": string("What changed in the listing or release", max: 4000),
+        "start_date": string("UTC date the change began, YYYY-MM-DD", max: 10),
+        "window_days": integer("Days in each before/after window", min: 7, max: 30, default: 14),
+        "keywords": strings("Terms measured independently of the tracked selection", max: 20),
+        "notes": string("Other releases, campaigns and caveats", max: 4000),
+      ]),
+      required: ["app_id", "title", "hypothesis", "change", "start_date", "keywords"],
+      localWrite: true, external: false),
+    tool(
+      "list_experiments", "List local experiment summaries with IDs and revisions, newest first.",
+      fields(["limit": integer("Maximum summaries", min: 1, max: 100, default: 20)]),
+      required: ["app_id"], external: false),
+    tool(
+      "update_experiment",
+      "Update an experiment's status or notes locally. Requires its current revision to prevent overwriting another update. Original definition and captured baseline remain unchanged.",
+      fields([
+        "experiment_id": experimentID,
+        "expected_revision": integer(
+          "Current revision from the record", min: 1, max: 1_000_000, default: 1),
+        "status": string("running, completed, or stopped", max: 20).setting([
+          "enum": ["running", "completed", "stopped"]
+        ]),
+        "notes": string("Replacement notes; original change definition is preserved", max: 4000),
+      ]),
+      required: ["app_id", "experiment_id", "expected_revision"], localWrite: true,
+      destructive: true, external: false),
+    tool(
+      "experiment_report",
+      "Compare an experiment's equal before/after windows using saved daily ranks and analytics. Preserves the original baseline alongside recalculated evidence. Missing coverage produces null differences. Completing an experiment does not prove success or causation.",
+      fields(["experiment_id": experimentID]), required: ["app_id", "experiment_id"],
+      external: false),
     tool(
       "setup_status",
       "Check capabilities and whether Apple credentials are configured. Does not reveal credentials or make network calls.",
@@ -158,6 +200,8 @@ public enum ToolCatalog {
         "minimum_change": integer(
           "Minimum position change to flag; top-10 crossings also count", min: 1, max: 200,
           default: 3),
+        "offset": integer("Keyword page offset", min: 0, max: 100, default: 0),
+        "batch_size": integer("Keywords per page", min: 1, max: 20, default: 20),
       ]),
       required: ["app_id"], external: false),
   ]
@@ -173,6 +217,7 @@ public enum ToolCatalog {
         "invalid_arguments", "Missing required or unexpected tool arguments. Read the tool schema.")
     }
     func check(_ value: JSON, _ schema: JSON) -> Bool {
+      if let choices = schema["enum"].arrayValue, !choices.contains(value) { return false }
       switch schema["type"].text {
       case "string":
         return value.stringValue.map {

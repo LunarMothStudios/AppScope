@@ -2,7 +2,7 @@
 
 This guide is for maintainers. Building locally or running CI does not publish
 a repository, release or Homebrew tap. There is no Python/npm package to publish.
-The current v0.1.0 artifacts are local development builds; see
+The current v0.2.0 artifacts are local development builds; see
 [validation status](VALIDATION.md).
 
 ## 1. Prepare a reviewable source release
@@ -15,8 +15,7 @@ The current v0.1.0 artifacts are local development builds; see
 - Keep `LICENSE`, dependency pins, security guidance and the handbook with the
   source. Enable GitHub's private vulnerability reporting when available, and
   update `SECURITY.md` with that actual reporting route.
-- Update `Version.swift`, changelog, version examples and the Homebrew formula
-  generator's version assertion together. Document schema changes and migration/
+- Update `Version.swift`, changelog, version examples and the archive version marker together. Document schema changes and migration/
   downgrade limits before shipping them. Preview status does not excuse silent
   metric or output-contract changes.
 - Replace the current local-preview status in the README, handbook, FAQ and
@@ -36,12 +35,14 @@ git diff --check
 ```
 
 Adjust `DEVELOPER_DIR` if Xcode is installed elsewhere. The package script also
-runs the documentation check. It builds both `arm64` and `x86_64`, creates a
+runs the documentation check. Every archive includes `VERSION` and `BUILD.json` (source revision and whether
+uncommitted changes were present). Build from the intended clean commit. Staging
+is temporary and recreated for each build. It builds both `arm64` and `x86_64`, creates a
 single executable, includes the handbook/examples/licenses and produces:
 
 ```text
-dist/appscope-0.1.0-macos-universal.tar.gz
-dist/appscope-0.1.0-macos-universal.tar.gz.sha256
+dist/appscope-0.2.0-macos-universal.tar.gz
+dist/appscope-0.2.0-macos-universal.tar.gz.sha256
 ```
 
 Names follow the executable's version. Run `shasum -a 256 -c` on the checksum file
@@ -69,7 +70,10 @@ notarization and waits for Apple's result. **Read and verify that the returned
 notarization status is Accepted.** Script completion alone is insufficient
 qualification. If the result is invalid or uncertain, inspect the submission
 with `xcrun notarytool info`/`log` using its submission ID and resolve it before
-publishing a notarized claim.
+publishing a notarized claim. The package script now rejects every status other
+than Accepted before creating the archive. Set `APPSCOPE_REQUIRE_NOTARIZATION=1`
+to require signing/profile prerequisites from the start. A pre-existing archive
+from an earlier build is not evidence that a failed new build succeeded.
 
 The bare CLI cannot be stapled; Gatekeeper checks its ticket online. Check the
 Developer ID signature and exercise the actual downloaded archive on a clean Mac
@@ -83,7 +87,7 @@ artifacts only; they do not use signing secrets or upload a public release.
 ## 4. Publish matching source and artifacts
 
 Publish the reviewed source to the chosen repository, tag the verified commit
-as `v0.1.0` (or its actual version), and create a GitHub Release for that tag.
+as `v0.2.0` (or its actual version), and create a GitHub Release for that tag.
 Upload the exact archive and checksum verified above. Signing/rebuilding changes
 the artifact; if either happens, re-check the new archive and checksum together.
 
@@ -104,10 +108,11 @@ Replace `OWNER` and `/absolute/path/to/homebrew-tap` with the actual destination
 its `Formula` directory must already exist:
 
 ```sh
-./scripts/homebrew-formula.sh https://github.com/OWNER/AppScope/releases/download/v0.1.0/appscope-0.1.0-macos-universal.tar.gz dist/appscope-0.1.0-macos-universal.tar.gz > /absolute/path/to/homebrew-tap/Formula/appscope.rb
+./scripts/homebrew-formula.sh https://github.com/OWNER/AppScope/releases/download/v0.2.0/appscope-0.2.0-macos-universal.tar.gz dist/appscope-0.2.0-macos-universal.tar.gz > /absolute/path/to/homebrew-tap/Formula/appscope.rb
 ```
 
-The generator uses the supplied local archive's SHA-256. Review the URL, homepage,
+The generator checks the versioned filename against the archive's `VERSION` marker
+and uses its SHA-256 and actual version for the formula test. Review the URL, homepage,
 checksum, minimum macOS and version test. The formula downloads the universal
 binary, so end users need no compiler. Test a real `brew install OWNER/tap/appscope`,
 `brew test OWNER/tap/appscope` and upgrade from the previous version as applicable.

@@ -24,7 +24,11 @@ public struct Configuration: Sendable {
     }
     try checkPrivateFile(path)
     do {
-      return Configuration(directory: directory, values: try JSON.decode(Data(contentsOf: path)))
+      let values = try JSON.decode(Data(contentsOf: path))
+      guard values.objectValue != nil else {
+        throw ScopeError("invalid_config", "Configuration must be a JSON object.")
+      }
+      return Configuration(directory: directory, values: values)
     } catch {
       throw ScopeError(
         "invalid_config", "AppScope configuration must be valid JSON. Run appscope setup.")

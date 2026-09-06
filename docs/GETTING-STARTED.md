@@ -43,7 +43,7 @@ Ask the agent:
 
 > Call AppScope's setup_status and list its available tools.
 
-Expect 16 tools in v0.1.0. If the host cannot launch local stdio programs, it cannot
+Expect 24 tools in v0.2.0. If the host cannot launch local stdio programs, it cannot
 connect directly to this server. See [connection troubleshooting](TROUBLESHOOTING.md).
 Starting `appscope serve` yourself in Terminal looks quiet because it waits for
 MCP messages on standard input. That is not an installation test; use `doctor`.
@@ -89,13 +89,18 @@ An agent may propose additional audiences, but those are hypotheses to investiga
 
 ```sh
 appscope call track_keywords '{"app_id":"1234567890","country":"us","keywords":["pantry meal planner","reduce food waste","weekly meal plan"]}'
-appscope call refresh_rankings '{"app_id":"1234567890","country":"us","offset":0,"batch_size":10}'
+appscope call refresh_app '{"app_id":"1234567890","country":"us"}'
 ```
 
-Tracking saves the selection. Refreshing fetches and saves the observations.
-For more than one batch, pass the returned `next_offset` into the next refresh and
-continue until it is null. Keep the tracked selection stable while paging.
-Inspect `errors` even if the call itself succeeds; a batch can be partial.
+Tracking saves the selection. `refresh_app` collects metadata, optional Apple
+popularity, every selected rank and optional analytics, then returns a briefing.
+Unconfigured providers are skipped. Check `run.status` and `report.health`.
+
+The default request completes the whole run. For a host with short timeouts,
+set `max_steps: 3` and resume the returned `run_id` while its status is `paused`.
+A `partial` run contains failed steps; retry deliberately, then preserve unresolved
+errors in the report. See [refresh and recovery](REFRESH.md). The lower-level
+`refresh_rankings` tool remains available when you want ranking batches only.
 
 For one keyword's fuller competitor details:
 
@@ -126,9 +131,9 @@ on a later UTC date to build comparisons; refreshing repeatedly on the same day
 does not create a day-over-day trend. Matching ranking observations use a 15-minute cache.
 
 `daily_report` reads saved data; it does not collect fresh data. Without Apple
-credentials, its performance field may be null. `rankings_current` means the
-tracked ranking observations are dated today, not that every part of the report
-is complete. See the [response guide](RESPONSES.md).
+credentials, its performance field may be null. `rankings_current` describes only today’s ranks. Use `health.sources` for freshness
+and gaps in each data source. The briefing also includes compact seven-/thirty-day
+trends and recorded experiments. See the [response guide](RESPONSES.md).
 
 ## 7. Add demand and performance when ready
 

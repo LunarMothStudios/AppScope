@@ -19,6 +19,8 @@ no dashboard or extra app to open.
 | Competition estimates | Explained top-result rating counts and title matches; no credentials |
 | Keyword ideas and demand | Apple suggestions and available popularity; your Apple Ads API credentials |
 | App performance | Available downloads, engagement, sales/proceeds and date coverage; your App Store Connect API credentials and enabled reports |
+| Before/after experiments | Record changes, preserve baselines and compare equal periods with explicit gaps |
+| Reliable daily refresh | One resumable workflow, source freshness, 7/30-day trends and change candidates |
 | ASO and daily reports | Cached evidence and provisional experiments; your agent reasons, schedules and delivers the report |
 
 AppScope runs locally, stores history in SQLite, and uses your own credentials
@@ -36,7 +38,7 @@ From an AppScope source checkout, with Swift 6+ and a macOS SDK:
 ```
 
 `setup` prints MCP settings with the actual installed path. Add that connection
-to a host that launches local stdio MCP servers. Your agent will discover 16 tools.
+to a host that launches local stdio MCP servers. Your agent will discover 24 tools.
 Public app searches work immediately; Apple credentials are optional.
 
 For a direct first call:
@@ -50,7 +52,7 @@ Replace the search phrase, then verify the app's developer and URL. The
 app brief, keyword tracking and your first report.
 
 Compiled universal archives need **macOS 14+**, with no compiler, Xcode or Python
-on the user's Mac. This is currently a **local v0.1.0 preview**: public GitHub
+on the user's Mac. This is currently a **local v0.2.0 preview**: public GitHub
 downloads, a Homebrew tap and Developer ID notarization still need publication/
 qualification. No public install URL is claimed yet. See [installation](docs/SETUP.md)
 and the [validation record](docs/VALIDATION.md).
@@ -63,7 +65,7 @@ and the [validation record](docs/VALIDATION.md).
 > Explain the dates and gaps in the evidence.
 
 For recurring use, give your host the [daily job template](examples/hex-daily-job.md).
-The job collects fresh data before requesting a cached briefing. Installing
+The job uses `refresh_app` to collect data with saved checkpoints and return a briefing. Installing
 AppScope does not create a scheduler or enable a Hex job.
 
 ## Understand the evidence
@@ -74,7 +76,7 @@ AppScope does not create a scheduler or enable a Hex job.
 - **Competition is an estimate.** Popularity comes from Apple when supplied;
   unknown scores remain unknown. Audience ideas are hypotheses, not demographics.
 - **Performance has coverage limits.** Missing is not zero, reporting dates can
-  lag, and Apple's conversion rate is unavailable in v0.1. Account adapters have
+  lag, and Apple's conversion rate is unavailable in v0.2. Account adapters have
   automated fixture coverage and await live qualification with account access.
 
 No MCP tool edits live listings or campaigns or spends money. Read the
@@ -94,7 +96,7 @@ swift test
 swift run appscope-docs --check
 ```
 
-The docs check validates generated schemas, all 16 examples and relative file
+The docs check validates generated schemas, all 24 examples and relative file
 links. Use full Xcode's developer directory if the selected Command Line Tools
 cannot run the tests. See [contributing](CONTRIBUTING.md),
 [release packaging](docs/RELEASING.md) and [changelog](CHANGELOG.md).

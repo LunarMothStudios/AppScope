@@ -26,7 +26,16 @@ enum EvidenceDates {
     let expected = Set(dates(start: start, end: end))
     return !expected.isEmpty
       && expected == Set(summary["coverage"][report]["dates_with_reports"].list.map(\.text))
+      && expected
+        == Set(summary["coverage"][report]["dates_with_matching_country_rows"].list.map(\.text))
       && (summary["coverage"][report]["matching_rows"].intValue ?? 0) > 0
+  }
+  static func completeMetric(_ summary: JSON, metric: String) -> Bool {
+    let coverage = summary["metric_coverage"][metric]
+    guard complete(summary, report: coverage["report"].text) else { return false }
+    return Set(dates(start: summary["start"].text, end: summary["end"].text))
+      == Set(coverage["dates_with_values"].list.map(\.text))
+      && summary["metrics"][metric].number != nil
   }
 }
 
@@ -85,7 +94,7 @@ public enum ReportHealth {
           && [
             "first_time_downloads", "redownloads", "impression_events", "product_page_view_events",
             "sales_usd", "proceeds_usd",
-          ].allSatisfy { performance[period]["metrics"][$0].number != nil }
+          ].allSatisfy { EvidenceDates.completeMetric(performance[period], metric: $0) }
       }
       if performanceHealth["status"].text == "fresh" && !complete {
         performanceHealth = performanceHealth.setting(["status": "partial"])
@@ -164,7 +173,8 @@ enum TrendEvidence {
 
 extension AppScope {
   func keywordTrends(
-    app: String, country: String, days: Int, minimumChange: Int, now: Date = Date()
+    app: String, country: String, days: Int, minimumChange: Int, offset: Int = 0,
+    batchSize: Int = 100, now: Date = Date()
   ) async throws -> JSON {
     let today = day(now)
     let baselineDate = dateOffset(day(now), days: -days)
@@ -174,7 +184,8 @@ extension AppScope {
     }
     var terms: [JSON] = []
     var changes: [JSON] = []
-    for item in tracked {
+    let selected = Array(tracked.dropFirst(offset).prefix(batchSize))
+    for item in selected {
       let keyword = item["keyword"].text
       let history = try await database.dailySnapshots(
         app: app, country: country, keyword: keyword, start: baselineDate, end: today)
@@ -204,6 +215,29 @@ extension AppScope {
         ])
       }
       let window = TrendEvidence.window(history, start: start, end: today)
+      let competitorMovements: [JSON] = current["competitors"].list.prefix(3).compactMap {
+        candidate in
+        guard
+          let previous = baseline["competitors"].list.prefix(3).first(where: {
+            $0["app_id"] == candidate["app_id"]
+          }),
+          let before = previous["position"].intValue, let after = candidate["position"].intValue
+        else { return nil }
+        return [
+          "app_id": candidate["app_id"], "title": candidate["title"],
+          "previous_position": .int(before),
+          "current_position": .int(after), "position_change": .int(before - after),
+          "days_in_top_three": .int(
+            history.filter {
+              $0["observed_at"].text.prefix(10) >= start
+                && $0["competitors"].list.prefix(3).contains { $0["app_id"] == candidate["app_id"] }
+            }.count),
+        ]
+      }
+      let departed = baseline["competitors"].list.prefix(3).filter { previous in
+        current["competitors"].arrayValue != nil
+          && !current["competitors"].list.prefix(3).contains { $0["app_id"] == previous["app_id"] }
+      }
       let evidence = window.setting([
         "keyword": .string(keyword), "baseline_date": .string(baselineDate),
         "baseline_observation": baseline == .null ? .null : compact(baseline),
@@ -211,6 +245,8 @@ extension AppScope {
         "latest_observed_at": history.last?["observed_at"] ?? .null,
         "rank_change": delta.map(JSON.int) ?? .null, "meaningful_rank_change": .bool(meaningful),
         "new_top_three_competitors": .array(newCompetitors),
+        "departed_top_three_competitors": .array(departed),
+        "competitor_movements": .array(competitorMovements),
       ])
       terms.append(evidence)
       var kinds: [String] = []
@@ -223,6 +259,12 @@ extension AppScope {
       }
       if newCompetitors.contains(where: { ($0["days_in_top_three"].intValue ?? 0) >= 2 }) {
         kinds.append("recurring_competitor_entry")
+      }
+      if competitorMovements.contains(where: {
+        abs($0["position_change"].intValue ?? 0) >= 2
+          && ($0["days_in_top_three"].intValue ?? 0) >= 2
+      }) {
+        kinds.append("recurring_competitor_movement")
       }
       for kind in kinds {
         changes.append([
@@ -240,8 +282,32 @@ extension AppScope {
       "as_of": .string(today),
       "source": "itunes_search", "requested_limit": 200, "keywords": .array(terms),
       "changes": .array(changes),
+      "total_tracked": .int(tracked.count), "offset": .int(offset),
+      "next_offset": offset + selected.count < tracked.count
+        ? .int(offset + selected.count) : .null,
       "notification_guidance":
         "These are change candidates, not sent notifications. Respect the owner's preferences and retain IDs to avoid duplicate messages. A single change is not proof of a sustained trend or causation.",
+    ]
+  }
+  func briefChange(_ change: JSON) -> JSON {
+    let keys = ["id", "kind", "keyword", "rank_change", "baseline_date", "current_date", "source"]
+    return .object(Dictionary(uniqueKeysWithValues: keys.map { ($0, change[$0]) }))
+  }
+  func briefTrends(_ trends: JSON) -> JSON {
+    let keys = [
+      "keyword", "rank_change", "observed_days", "expected_days", "found_days", "not_found_days",
+      "mean_found_position", "meaningful_rank_change",
+    ]
+    return [
+      "days": trends["days"], "as_of": trends["as_of"], "source": trends["source"],
+      "requested_limit": trends["requested_limit"],
+      "keywords": .array(
+        trends["keywords"].list.map { item in
+          .object(Dictionary(uniqueKeysWithValues: keys.map { ($0, item[$0]) }))
+        }),
+      "total_change_candidates": .int(trends["changes"].list.count),
+      "details":
+        "Use keyword_trends, paging through next_offset, for exact dates and competitor evidence. Daily briefings omit full trend snapshots and show at most 20 change candidates.",
     ]
   }
 }

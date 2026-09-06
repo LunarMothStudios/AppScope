@@ -26,7 +26,7 @@ export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 Keep dependencies pinned in `Package.resolved`. The tests use Swift Testing and
 synthetic provider responses, including a real MCP client launching the debug
 executable over stdio. They do not require Apple credentials or live provider
-requests. The test suite currently contains 21 tests; the dated
+requests. The test suite includes deterministic provider and workflow tests; the dated
 [validation record](docs/VALIDATION.md) explains what passing establishes.
 
 To test the MCP subprocess against a packaged executable, set

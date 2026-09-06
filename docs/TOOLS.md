@@ -1,6 +1,6 @@
 # MCP tool reference
 
-Generated from `ToolCatalog.all` for AppScope 0.1.0. Run
+Generated from `ToolCatalog.all` for AppScope 0.2.0. Run
 `swift run appscope-docs` to regenerate; `swift run appscope-docs --check`
 validates this page, the JSON catalog, examples, fenced JSON and relative file links.
 
@@ -25,6 +25,140 @@ Dates must be real YYYY-MM-DD dates. See the response guide for semantic limits.
 
 MCP annotations describe local side effects. No tool changes live Apple listings
 or campaigns. Read-only tools can still return private account data to your host.
+
+## `check_connections`
+
+Make bounded read-only live provider checks for this app. Unconfigured providers are skipped. Tests public lookup, Apple Ads suggestions and App Store Connect app/report-request access. Does not enable or import reports, expose credentials or persist results.
+
+Local writes: **no**. Network access: **possible**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us"
+  },
+  "name" : "check_connections"
+}
+```
+
+## `record_experiment`
+
+Record an ASO change, hypothesis, UTC release date, comparison window and up to 20 terms. Saves a baseline from existing local evidence; does not collect or publish. Supply a stable experiment_id UUID for safe retries; reusing it with different details is rejected.
+
+Local writes: **yes**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `change` | string | yes | — | 1–4000 characters; What changed in the listing or release |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `experiment_id` | string | no | — | 1–36 characters; Experiment UUID returned by AppScope |
+| `hypothesis` | string | yes | — | 1–2000 characters; Expected mechanism, not a promised outcome |
+| `keywords` | string array | yes | — | 0–20 items; Each item: 1–100 characters; Terms measured independently of the tracked selection |
+| `notes` | string | no | — | 1–4000 characters; Other releases, campaigns and caveats |
+| `start_date` | string | yes | — | 1–10 characters; UTC date the change began, YYYY-MM-DD |
+| `title` | string | yes | — | 1–200 characters; Short experiment title |
+| `window_days` | integer | no | `14` | 7–30; Days in each before/after window |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "change" : "Released pantry-focused subtitle",
+    "country" : "us",
+    "experiment_id" : "11111111-1111-4111-8111-111111111111",
+    "hypothesis" : "Relevant wording may improve discovery",
+    "keywords" : [
+      "pantry meal planner"
+    ],
+    "start_date" : "2026-08-30",
+    "title" : "Clearer pantry subtitle",
+    "window_days" : 14
+  },
+  "name" : "record_experiment"
+}
+```
+
+## `list_experiments`
+
+List local experiment summaries with IDs and revisions, newest first.
+
+Local writes: **no**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `limit` | integer | no | `20` | 1–100; Maximum summaries |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us",
+    "limit" : 20
+  },
+  "name" : "list_experiments"
+}
+```
+
+## `update_experiment`
+
+Update an experiment's status or notes locally. Requires its current revision to prevent overwriting another update. Original definition and captured baseline remain unchanged.
+
+Local writes: **yes**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `expected_revision` | integer | yes | `1` | 1–1000000; Current revision from the record |
+| `experiment_id` | string | yes | — | 1–36 characters; Experiment UUID returned by AppScope |
+| `notes` | string | no | — | 1–4000 characters; Replacement notes; original change definition is preserved |
+| `status` | string | no | — | 1–20 characters; running, completed, or stopped; Choices: running, completed, stopped |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us",
+    "expected_revision" : 1,
+    "experiment_id" : "11111111-1111-4111-8111-111111111111",
+    "notes" : "Review coverage before drawing conclusions",
+    "status" : "completed"
+  },
+  "name" : "update_experiment"
+}
+```
+
+## `experiment_report`
+
+Compare an experiment's equal before/after windows using saved daily ranks and analytics. Preserves the original baseline alongside recalculated evidence. Missing coverage produces null differences. Completing an experiment does not prove success or causation.
+
+Local writes: **no**. Network access: **none**.
+
+| Argument | Type | Required | Default | Constraints and meaning |
+|---|---|---|---|---|
+| `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
+| `experiment_id` | string | yes | — | 1–36 characters; Experiment UUID returned by AppScope |
+
+```json
+{
+  "arguments" : {
+    "app_id" : "1234567890",
+    "country" : "us",
+    "experiment_id" : "11111111-1111-4111-8111-111111111111"
+  },
+  "name" : "experiment_report"
+}
+```
 
 ## `setup_status`
 
@@ -462,9 +596,11 @@ Local writes: **no**. Network access: **none**.
 | Argument | Type | Required | Default | Constraints and meaning |
 |---|---|---|---|---|
 | `app_id` | string | yes | — | 1–20 characters; Numeric App Store app ID |
+| `batch_size` | integer | no | `20` | 1–20; Keywords per page |
 | `country` | string | no | `us` | Exactly two ISO letters; Two-letter ISO storefront country; defaults to us |
 | `days` | integer | no | `7` | 7–30; Window days, usually 7 or 30 |
 | `minimum_change` | integer | no | `3` | 1–200; Minimum position change to flag; top-10 crossings also count |
+| `offset` | integer | no | `0` | 0–100; Keyword page offset |
 
 ```json
 {

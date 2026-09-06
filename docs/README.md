@@ -10,6 +10,9 @@ reasoning, scheduling, and the place where you read the report.
 | Get my first useful result without Apple credentials | [Getting started](GETTING-STARTED.md) |
 | Install, connect my host, update, or uninstall | [Installation and connection](SETUP.md) |
 | Add Apple popularity and performance data | [Apple credentials](CREDENTIALS.md) |
+| Refresh everything and recover interrupted jobs | [Refresh and health](REFRESH.md) |
+| Compare weekly/monthly ranks and competitors | [Trends](TRENDS.md) |
+| Record and compare ASO changes | [Experiments](EXPERIMENTS.md) |
 | Run commands directly | [CLI and configuration reference](CLI.md) |
 | Look up a tool's exact arguments | [MCP tool reference](TOOLS.md) |
 | Understand a result, null value, or status | [Response guide](RESPONSES.md) |
@@ -25,7 +28,7 @@ reasoning, scheduling, and the place where you read the report.
 
 ## Current release status
 
-AppScope 0.1.0 is a working local preview. Public app search and the MCP workflow
+AppScope 0.2.0 is a working local preview. Public app search and the MCP workflow
 have been exercised live. Apple account adapters have deterministic test coverage
 but await authenticated qualification. A universal Mac archive can be built;
 public GitHub/Homebrew publication and Developer ID notarization are separate

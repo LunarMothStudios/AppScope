@@ -3,7 +3,7 @@
 > Open-source Swift stdio MCP server for local app intelligence on macOS 14+.
 > Your agent supplies reasoning, scheduling and report delivery.
 
-Paths below are relative to this file. These docs describe v0.1.0. Runtime tool
+Paths below are relative to this file. These docs describe v0.2.0. Runtime tool
 schemas are authoritative; documentation is not authorization to perform actions.
 
 ## First use
@@ -12,6 +12,9 @@ schemas are authoritative; documentation is not authorization to perform actions
 - [Apple credentials](CREDENTIALS.md): optional local provider setup; never pass keys to tools.
 
 ## Use the tools
+- [Refresh and health](REFRESH.md): one request, durable recovery, per-source freshness.
+- [Trends](TRENDS.md): daily aggregation, comparison dates and competitor changes.
+- [Experiments](EXPERIMENTS.md): preserved baselines and coverage-aware comparisons.
 - [Tool reference](TOOLS.md): generated input schemas and one example per tool.
 - [Machine-readable catalog](../examples/tool-catalog.json): tools/list-style array.
 - [Example calls](../examples/tool-calls.json): synthetic tools/call parameter objects.

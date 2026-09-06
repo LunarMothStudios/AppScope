@@ -26,6 +26,9 @@ import MCP
         appscope serve                       Start the MCP server over stdio
         appscope setup                       Create private configuration, print MCP connection
         appscope doctor                      Check local setup (no network)
+        appscope doctor --live APP_ID         Check configured providers (read-only network)
+        appscope configure PROVIDER          Guided local setup: apple-ads or app-store-connect
+        appscope keygen apple-ads             Create a private P-256 key and print its public key
         appscope call TOOL '{"arg":"value"}'  Call a tool directly and print JSON
         appscope enable-reports APP_ID --confirm  One-time Apple report enablement (Admin)
         appscope --version                   Print version
@@ -44,10 +47,33 @@ import MCP
       try setup()
       return
     }
+    if args[0] == "configure" {
+      guard args.count == 2 else {
+        throw ScopeError("usage", "Use: appscope configure apple-ads|app-store-connect")
+      }
+      try configure(args[1])
+      return
+    }
+    if args[0] == "keygen" {
+      guard args == ["keygen", "apple-ads"] else {
+        throw ScopeError("usage", "Use: appscope keygen apple-ads")
+      }
+      print(try CredentialSetup.generateAdsKey().jsonText(pretty: true))
+      return
+    }
     let configuration = try Configuration.load()
     let scope = try AppScope(config: configuration)
     switch args[0] {
-    case "doctor": print(try await scope.status().jsonText(pretty: true))
+    case "doctor":
+      if args.count == 1 {
+        print(try await scope.status().jsonText(pretty: true))
+      } else if args.count == 3 && args[1] == "--live" {
+        print(
+          try await scope.call("check_connections", ["app_id": .string(args[2])]).jsonText(
+            pretty: true))
+      } else {
+        throw ScopeError("usage", "Use: appscope doctor [--live APP_ID]")
+      }
     case "call":
       guard args.count == 3, let object = try JSON.decode(Data(args[2].utf8)).objectValue else {
         throw ScopeError("usage", "Use: appscope call TOOL '{\"argument\":\"value\"}'")
@@ -107,6 +133,38 @@ import MCP
       await server.waitUntilCompleted()
     default: throw ScopeError("usage", "Unknown command. Run appscope --help.")
     }
+  }
+  static func configure(_ name: String) throws {
+    guard isatty(STDIN_FILENO) != 0 else {
+      throw ScopeError(
+        "terminal_required",
+        "Run guided configuration in Terminal. Never pass credentials through MCP or piped prompts."
+      )
+    }
+    let provider = name.replacingOccurrences(of: "-", with: "_")
+    let fields = try CredentialSetup.fields(for: provider)
+    let config = try Configuration.load()
+    print(
+      "Configure \(name) locally. Enter identifiers and a private-key FILE PATH, never private-key contents."
+    )
+    print("Press Return to keep an existing value. Press Ctrl-D to cancel without saving.")
+    var values: [String: JSON] = [:]
+    for field in fields {
+      let existing = config.values[provider][field].text
+      print("\(field)\(existing.isEmpty ? "" : " [keep existing]"): ", terminator: "")
+      fflush(stdout)
+      guard let line = readLine() else {
+        throw ScopeError(
+          "setup_cancelled", "Configuration cancelled; existing settings are unchanged.")
+      }
+      let value = line.trimmingCharacters(in: .whitespacesAndNewlines)
+      values[field] = .string(value.isEmpty ? existing : value)
+    }
+    try CredentialSetup.save(provider: provider, fields: values)
+    print(
+      "Saved private local configuration. Key format and permissions checked; Apple access is still unverified."
+    )
+    print("Restart the MCP connection. To test access: appscope doctor --live YOUR_NUMERIC_APP_ID")
   }
   static func setup() throws {
     let environment = ProcessInfo.processInfo.environment

@@ -22,7 +22,7 @@ configuration into a chat or issue.
 | macOS blocks a downloaded executable | Check that it came from the intended release and matches its checksum. Verify the release's signing/notarization status with its maintainer. Do not disable Gatekeeper. Source installation is an alternative. |
 | Host cannot start the server | Use `command` pointing to the executable, with `args: ["serve"]`. Do not put shell syntax, quotes, or the word `serve` inside `command`. Check the host's stderr log. |
 | `appscope serve` appears to hang in Terminal | It is waiting for MCP messages on stdin. Use `appscope call` for direct testing; the MCP host normally launches `serve`. |
-| Host sees no tools | Restart that MCP connection after changing settings. Confirm it supports launching a local stdio server and has tools enabled. AppScope advertises 16 tools in v0.1.0. |
+| Host sees no tools | Restart that MCP connection after changing settings. Confirm it supports launching a local stdio server and has tools enabled. AppScope advertises 24 tools in v0.2.0. |
 | Terminal sees data but the host does not | Compare `APPSCOPE_DATA_DIR`, `APPSCOPE_CONFIG`, executable version and macOS user in both environments. A GUI host need not inherit Terminal's environment. |
 | Ranking batches time out | Start with `batch_size: 3`, follow `next_offset`, and use a host tool timeout of at least 120 seconds. An uncached 10-term batch includes roughly 30 seconds of pacing, plus network time/retries. |
 
@@ -89,7 +89,7 @@ concluding that downloads or revenue changed.
 | `synced` but some reports are missing | Sync completion does not guarantee all three report types or every requested date. Read `missing_reports` and per-report coverage. |
 | Old dates remain empty | Summary dates and import lookback are separate. Increase `sync_days` if appropriate (7–90 processing days). Full historical backfill is not implemented. |
 | Country metrics are null | Missing matching report rows are unknown, not zero. Check country, dates, report type and available coverage. |
-| Conversion rate is null | Expected in v0.1. AppScope does not reconstruct Apple's conversion rate from segmented unique counts. |
+| Conversion rate is null | Expected in v0.2. AppScope does not reconstruct Apple's conversion rate from segmented unique counts. |
 | `unsafe_url`, `invalid_report`, checksum/size errors | The import stopped rather than accepting unexpected data. Keep existing data, record the error code and report a sanitized reproduction. Do not bypass validation. |
 | `daily_report` is `incomplete` | Save a brief, fetch a profile, track keywords and finish every refresh batch. Read missing/stale lists. The briefing itself performs no network requests. |
 | Report says `rankings_current` but performance is old | That status describes only today's tracked rankings. Fetch `app_performance` and inspect its independent dates/coverage. |
@@ -115,3 +115,22 @@ observed behavior. State whether this happens with fresh local data and whether
 the provider call was public or authenticated. Remove account identifiers,
 private app information, tokens, signed report URLs and local usernames/paths.
 Do not attach config, databases, keys, or raw authenticated report exports.
+
+## Refresh runs and guided setup
+
+For `refresh_busy`, another process holds this app/country's lock. Read
+`refresh_status` and wait for that process to finish; a leftover `.lock` filename
+alone is harmless. For a saved running/paused/interrupted state, resume the run
+on the same UTC date. For `run_expired`, start a new run. Changed options or a
+new tracked selection require `new_run: true`. See [recovery](REFRESH.md).
+
+`terminal_required` means guided configuration was launched without a real
+Terminal. Use `appscope configure apple-ads` or `appscope configure app-store-connect`
+in Terminal. Ctrl-D cancels without saving. Missing fields or invalid/unsafe keys
+are rejected before replacing existing config. `keygen apple-ads` intentionally
+refuses to overwrite an existing key pair. Keep existing private keys; do not
+regenerate them as a routine fix for an authentication failure.
+
+`doctor --live APP_ID` checks public lookup and configured account access. Inspect
+its per-provider `checks`, even when the CLI exits successfully. A successful
+App Store Connect access check still needs a real report import to validate data.

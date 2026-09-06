@@ -2,6 +2,14 @@ import Foundation
 import MCP
 
 public enum Ranking {
+  static func canReuse(_ snapshot: JSON, limit: Int, now: Date = Date()) -> Bool {
+    guard snapshot["requested_limit"].intValue == limit, snapshot["source"].text == "itunes_search",
+      let observed = ISO8601DateFormatter().date(from: snapshot["observed_at"].text),
+      day(observed) == day(now)
+    else { return false }
+    let age = now.timeIntervalSince(observed)
+    return age >= 0 && age < 900
+  }
   public static func app(_ item: JSON) throws -> JSON {
     guard let id = item["trackId"].intValue, id > 0, !item["trackName"].text.isEmpty else {
       throw ScopeError(

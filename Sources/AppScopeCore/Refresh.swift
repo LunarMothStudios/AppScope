@@ -122,6 +122,7 @@ extension AppScope {
       try await database.put("refresh_run", run["run_id"].text, run)
       try await database.put("refresh_latest", "\(app)|\(country)", ["run_id": run["run_id"]])
     }
+    try await database.put("refresh_latest", "\(app)|\(country)", ["run_id": run["run_id"]])
     if run["status"].text == "completed" {
       return ["run": summarizeRefresh(run), "report": try await report(app: app, country: country)]
     }
@@ -193,8 +194,10 @@ extension AppScope {
       try await database.put("refresh_run", run["run_id"].text, run)
       completed += 1
       attempted += 1
-      await progress?(
-        completed, steps.count, "Completed \(completed) of \(steps.count) refresh steps")
+      if !Task.isCancelled {
+        await progress?(
+          completed, steps.count, "Completed \(completed) of \(steps.count) refresh steps")
+      }
     }
     let pending = steps.contains { ["pending", "running"].contains($0["status"].text) }
     let failed = steps.contains { $0["status"].text == "failed" }

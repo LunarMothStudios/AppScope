@@ -138,7 +138,7 @@ public actor Database {
   }
   public func replaceRevision(_ kind: String, _ key: String, revision: Int, value: JSON) throws {
     _ = try run(
-      "UPDATE records SET body=? WHERE kind=? AND key=? AND json_extract(body,'$.revision')=?",
+      "UPDATE records SET body=? WHERE kind=? AND key=? AND json_extract(body,'$.revision')=CAST(? AS INTEGER)",
       [value.jsonText(), kind, key, String(revision)])
     guard sqlite3_changes(handle) == 1 else {
       throw ScopeError("revision_conflict", "This record changed. Read it again before updating.")

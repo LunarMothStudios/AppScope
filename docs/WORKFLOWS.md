@@ -45,7 +45,7 @@ check them; it must not present those candidates as a known competitor keyword l
 ## Choose a measurable ASO experiment
 
 Use `aso_strategy` or `daily_report` after collecting data. They return the same
-cached briefing in v0.1. The agent can refine its provisional suggestions.
+cached briefing in v0.2. The agent can refine its provisional suggestions.
 
 A useful experiment includes the affected app/country, target term or audience,
 current evidence and dates, a proposed change, the expected mechanism, a baseline,
@@ -66,20 +66,25 @@ The owner must review listing changes and Apple's current rules before publishin
 
 ## Daily report
 
-Recommended order for a host-owned scheduled job:
+Recommended workflow for a host-owned scheduled job:
 
-1. `setup_status` and `app_profile` to establish context and available providers.
-2. `keyword_suggestions` when useful and configured, before new ranking observations
-   so scores can attach to them. Keep freshly returned scores separately if an
-   existing ranking snapshot is still cached.
-3. `refresh_rankings` in batches until `next_offset` is null. Record partial errors;
-   retry failed terms with `analyze_keyword` later if appropriate.
-4. `app_performance` when App Store Connect is configured, to sync reporting data.
-   The default comparison period ends three days ago; check coverage rather than
-   assuming the period is complete.
-5. `daily_report`; turn the evidence into a concise narrative with changes,
-   competitors, uncertainties and at most three experiments. Save the result in
-   the host's normal job history.
+1. Call `refresh_app`. It collects sources in order and returns `run` plus `report`.
+   For short host timeouts, use `max_steps: 3` and resume the returned `run_id` while
+   paused. Retry failed steps at most once per job, then report unresolved failures.
+2. Inspect `report.health`, each source date and the run's skipped/failed steps.
+   A completed collection run does not imply complete provider data.
+3. Review compact 7/30-day trends and change candidates. Request paginated
+   `keyword_trends` for detailed competitor evidence when relevant. Daily movement
+   is also visible in each ranking's previous-observation fields.
+4. Review running experiment summaries; call `experiment_report` for those whose
+   comparison windows are ready. Keep original baselines, corrections and coverage
+   visible. See [experiment tracking](EXPERIMENTS.md).
+5. Write the narrative and save it in the host's normal job history. Choose at
+   most three actions supported by the app brief and evidence.
+
+The separate collection tools remain available for targeted research. Use
+`check_connections` after setup or to diagnose access; repeating it on every
+healthy daily job adds requests without collecting useful history.
 
 Use the [copyable daily-job template](../examples/hex-daily-job.md). Configure the
 schedule in Hex when its scheduler is ready, or in another host. AppScope does not
@@ -95,7 +100,7 @@ on every unchanged run.
 Repeat the workflow for each verified app ID and country. Briefs are app-wide;
 keyword tracking, ranking snapshots and cached performance are country-specific.
 The default is `us`, not the computer's region. There is no `country: all` option
-in the v0.1 MCP tools. Run separate country calls and keep their evidence separate.
+in the v0.2 MCP tools. Run separate country calls and keep their evidence separate.
 
 Prefer one active server and one job at a time. SQLite supports multiple local
 processes, but request pacing and Apple Ads token caching are per process.

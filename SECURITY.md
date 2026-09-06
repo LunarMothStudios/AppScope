@@ -28,6 +28,12 @@ using an Admin key; it is absent from MCP. Protect the Mac and MCP host: a proce
 running as your macOS user can already read that user's files. AppScope is not a
 sandbox against a compromised host.
 
+Guided configuration and key generation are CLI-only. The former requires a real
+Terminal, validates keys offline, preserves other provider settings and atomically
+replaces private config. Key generation never prints private bytes or overwrites
+existing key files. Live connection checks expose outcomes, not tokens/provider
+bodies, and do not enable or download analytics reports.
+
 Configuration/history are protected by filesystem permissions, not application-
 level encryption. Protect backups as private data. The MCP host and its agent can
 see all results returned by tools they are allowed to call, including account
