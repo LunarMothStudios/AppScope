@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "AppScopeCore", targets: ["AppScopeCore"])
     ],
     dependencies: [
-        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.11.0")
+        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1")
     ],
     targets: [
         .systemLibrary(name: "CSQLite", pkgConfig: "sqlite3"),
