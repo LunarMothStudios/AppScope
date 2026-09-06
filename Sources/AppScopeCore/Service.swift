@@ -37,7 +37,7 @@ public actor AppScope {
         "tracked_keywords": .array(try await database.list("tracked")),
       ]
     }
-    if name == "owned_apps" { return try await connect.apps() }
+    if name == "owned_apps" { return ["apps": try await connect.apps()] }
     let app = try a["app_id"].stringValue.map(Validate.appID)
     let country = try Validate.country(a["country"].stringValue ?? "us")
     switch name {

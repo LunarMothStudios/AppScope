@@ -2,7 +2,7 @@
 
 Verified on an Apple Silicon Mac with Swift 6.3.3 and the Xcode macOS SDK.
 
-- `swift test`: 20 passing Swift Testing tests, including a real Swift MCP client
+- `swift test`: 21 passing Swift Testing tests, including a real Swift MCP client
   launching the server executable as a subprocess.
 - The same MCP integration test passed against the installed universal executable.
 - A second MCP client launched the installed binary and successfully called public
@@ -14,7 +14,7 @@ Verified on an Apple Silicon Mac with Swift 6.3.3 and the Xcode macOS SDK.
 - Universal archive built for `x86_64` and `arm64`; both Mach-O slices declare
   macOS 14.0 as their minimum. The ARM slice was executed on the local Mac. An
   Intel Mac and a clean macOS 14 machine have not been used for runtime checks.
-- Binary installer and private setup configuration verified. New data directory
+- Source and binary installers and private setup configuration verified. New data directory
   permissions are 0700; configuration/database files are 0600.
 - Format lint, shell syntax, Git whitespace checks and a source scan for private
   key/token patterns passed. This scan is not an independent security audit.

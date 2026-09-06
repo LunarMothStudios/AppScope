@@ -157,3 +157,14 @@ actor MockHTTP: HTTPTransport {
   #expect(outcomes.filter { $0 }.count == 1)
   #expect(try await first.list("tracked").count == 60)
 }
+
+@Test func ownedAppsReturnsAnObjectForMCPStructuredContent() async throws {
+  let dir = try scratch()
+  defer { try? FileManager.default.removeItem(at: dir) }
+  let transport = MockHTTP([(["data": [["id": "12", "attributes": ["name": "Example"]]]], 200)])
+  let scope = try AppScope(
+    config: testCredentials(dir), http: HTTP(transport: transport, searchInterval: 0))
+  let result = try await scope.call("owned_apps", [:])
+  #expect(result.objectValue != nil)
+  #expect(result["apps"].list.first?["id"].text == "12")
+}
