@@ -129,7 +129,8 @@ public actor AppScope {
     case "search_term_popularity":
       let start = try Validate.date(a["start"].text)
       let end = try Validate.date(a["end"].text)
-      let calendar = Calendar(identifier: .gregorian)
+      var calendar = Calendar(identifier: .gregorian)
+      calendar.timeZone = TimeZone(secondsFromGMT: 0)!
       let startDate = ISO8601DateFormatter().date(from: start + "T12:00:00Z")!
       let endDate = ISO8601DateFormatter().date(from: end + "T12:00:00Z")!
       guard start <= end, end <= day(), calendar.component(.weekday, from: startDate) == 1,

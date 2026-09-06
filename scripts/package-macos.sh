@@ -12,11 +12,12 @@ version="$("$binary_dir/appscope" --version)"
 staging="$repo_root/dist/appscope-$version-macos-universal"
 mkdir -p "$staging/licenses"
 install -m 755 "$binary_dir/appscope" "$staging/appscope"
-cp LICENSE README.md "$staging/"
+cp LICENSE README.md SECURITY.md CONTRIBUTING.md "$staging/"
+cp -R docs examples "$staging/"
 cp scripts/install-binary.sh "$staging/install.sh"
 for dependency in .build/checkouts/*; do
   for license in "$dependency"/LICENSE "$dependency"/LICENSE.txt "$dependency"/LICENSE.md; do
-    if [[ -f "$license" ]]; then cp "$license" "$staging/licenses/$(basename "$dependency").txt"; break; fi
+    if [[ -f "$license" ]]; then install -m 644 "$license" "$staging/licenses/$(basename "$dependency").txt"; break; fi
   done
 done
 if [[ -n "${APPSCOPE_SIGNING_IDENTITY:-}" ]]; then
