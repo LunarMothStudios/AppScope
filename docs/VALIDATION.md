@@ -32,3 +32,25 @@ These tests do not establish live account qualification or device search accurac
 Apple's conversion rate is intentionally unavailable in v0.1; see the data contract.
 Hex scheduling is not enabled by this project. A host-side daily job template is
 provided separately in `examples/hex-daily-job.md`.
+
+## Documentation qualification — 2026-09-06
+
+- Re-ran the 21-test suite successfully after adding the maintainer docs utility.
+- Generated the tool reference and JSON catalog from the runtime catalog; all 16
+  synthetic calls passed schema/selected semantic validation. Fenced JSON and
+  relative documentation file links passed checks, including the agent index.
+- In isolated copies, confirmed the checker rejects stale generated files,
+  broken relative links, malformed fenced JSON and unexpected tool arguments.
+- Rebuilt the universal archive, verified its portable SHA-256 checksum, extracted
+  it and checked the handbook's links without a source tree present.
+- From that extracted archive, installed into a temporary prefix and verified
+  setup, doctor and nine local CLI workflows with synthetic data. The performance
+  example used `sync: false`; no authenticated provider request was made.
+- Swift formatting, shell syntax, Git whitespace and a limited public-doc scan
+  for local usernames/app identifiers/private-key patterns passed. This was not
+  an independent security audit or a complete secret-detection guarantee.
+
+CI and packaging now run `swift run appscope-docs --check`. The check does not
+validate external URLs, Markdown anchors, live account access or the accuracy of
+all explanatory prose. The Homebrew formula now includes the complete handbook;
+an actual public tap install remains a publication-stage check.

@@ -14,6 +14,8 @@ jobs:
         run: swift --version
       - name: Tests including real MCP subprocess
         run: swift test
+      - name: Documentation schemas, examples and links
+        run: swift run appscope-docs --check
       - name: Package both Mac architectures
         run: ./scripts/package-macos.sh
       - uses: actions/upload-artifact@v4

@@ -1,0 +1,18 @@
+[
+  {"name":"setup_status","arguments":{}},
+  {"name":"list_apps","arguments":{}},
+  {"name":"owned_apps","arguments":{}},
+  {"name":"search_apps","arguments":{"query":"meal planner","country":"us","limit":5}},
+  {"name":"app_profile","arguments":{"app_id":"1234567890","country":"us"}},
+  {"name":"save_app_brief","arguments":{"app_id":"1234567890","purpose":"Plan meals from food already in the pantry.","audiences":["Busy households reducing food waste"],"differentiators":["Plans around existing ingredients"],"business_goal":"Grow first-time downloads from relevant searches"}},
+  {"name":"track_keywords","arguments":{"app_id":"1234567890","country":"us","keywords":["pantry meal planner","reduce food waste"]}},
+  {"name":"untrack_keywords","arguments":{"app_id":"1234567890","country":"us","keywords":["reduce food waste"]}},
+  {"name":"analyze_keyword","arguments":{"app_id":"1234567890","country":"us","keyword":"pantry meal planner","limit":200}},
+  {"name":"refresh_rankings","arguments":{"app_id":"1234567890","country":"us","offset":0,"batch_size":10}},
+  {"name":"keyword_history","arguments":{"app_id":"1234567890","country":"us","keyword":"pantry meal planner","limit":30}},
+  {"name":"keyword_suggestions","arguments":{"app_id":"1234567890","country":"us","seeds":["pantry meal planner"],"offset":0}},
+  {"name":"search_term_popularity","arguments":{"country":"us","genre":"PRODUCTIVITY_UTILITIES","start":"2026-08-23","end":"2026-08-29","keywords":["task manager"],"offset":0}},
+  {"name":"app_performance","arguments":{"app_id":"1234567890","country":"us","sync":true}},
+  {"name":"daily_report","arguments":{"app_id":"1234567890","country":"us"}},
+  {"name":"aso_strategy","arguments":{"app_id":"1234567890","country":"us"}}
+]

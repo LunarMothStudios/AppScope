@@ -6,6 +6,7 @@ let package = Package(
   platforms: [.macOS(.v14)],
   products: [
     .executable(name: "appscope", targets: ["AppScopeCLI"]),
+    .executable(name: "appscope-docs", targets: ["AppScopeDocs"]),
     .library(name: "AppScopeCore", targets: ["AppScopeCore"]),
   ],
   dependencies: [
@@ -20,6 +21,10 @@ let package = Package(
     .executableTarget(
       name: "AppScopeCLI",
       dependencies: ["AppScopeCore", .product(name: "MCP", package: "swift-sdk")]),
+    .executableTarget(
+      name: "AppScopeDocs",
+      dependencies: ["AppScopeCore", .product(name: "MCP", package: "swift-sdk")],
+      path: "DevTools/AppScopeDocs"),
     .testTarget(name: "AppScopeTests", dependencies: ["AppScopeCore"]),
   ]
 )

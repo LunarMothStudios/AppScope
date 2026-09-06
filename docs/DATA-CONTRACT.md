@@ -19,8 +19,9 @@ app/country/term/depth are cached for 15 minutes. Calls are paced to approximate
 multiple processes do not share a rate limiter.
 
 Competition is an **estimate**, not Apple's difficulty metric. Among top-10
-results excluding the target app, we report median rating count and exact phrase
-matches in titles. High pressure: median >=10,000 or >=7 title matches. Moderate:
+results excluding the target app, we report median rating count and case-insensitive
+keyword substring matches in titles (not whole-word matching). High pressure:
+median >=10,000 or >=7 title matches. Moderate:
 median >=1,000 or >=4 title matches. Otherwise lower, or unknown with missing
 rating counts. Counts are ratings, not written reviews. This model ignores many
 ranking factors, does not measure relevance or predict rank, and is versioned
@@ -37,6 +38,12 @@ These datasets remain separate. Suggestion scores are cached with their original
 source/date. The periodic dataset is returned with its period and pagination.
 It is not silently substituted for a suggestion score. Pagination is explicit;
 pass `offset` to inspect further results. Missing popularity is always unknown.
+
+A ranking copies the then-cached suggestion into its snapshot. Later suggestion
+calls do not rewrite old snapshots, including ranks reused within the 15-minute
+cache window. Query suggestions before collecting new ranks, or attach newer
+suggestions separately with their dates. Periodic popularity rows are not persisted
+into these snapshots. See the [response guide](RESPONSES.md).
 
 Authentication, host and request shapes were checked against Apple's official
 [Python SDK 1.109.0](https://github.com/apple/apple-ads-platform-api-python), used

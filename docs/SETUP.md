@@ -1,11 +1,17 @@
-# Setup
+# Installation and connection
 
-AppScope works with any MCP host that can launch a local stdio process. There is no
-HTTP listener, cloud account, bundled LLM, scheduled daemon, or required GUI.
+AppScope runs on macOS 14+ with an MCP host that can launch a local stdio process.
+The host provides the agent and scheduler. Source and compiled installations use
+the same executable and local data format.
 
-## Install from Git
+For your first app and report, follow [getting started](GETTING-STARTED.md).
 
-Clone the AppScope repository, enter the checkout, then run:
+## Install from source
+
+Get the AppScope source from its official repository once published and enter
+that checkout. Building requires Swift 6+ and a macOS SDK. The installer selects
+full Xcode at `/Applications/Xcode.app/Contents/Developer` when available; otherwise
+use matching Command Line Tools. Dependency resolution needs network access.
 
 ```sh
 ./scripts/install.sh
@@ -13,33 +19,54 @@ Clone the AppScope repository, enter the checkout, then run:
 "$HOME/.local/bin/appscope" doctor
 ```
 
-The source install requires Swift 6+ and a macOS SDK. With full Xcode installed,
-our scripts select it automatically. Otherwise use matching Command Line Tools.
-The resulting executable does not require a Swift compiler or Python on the
-user's Mac. macOS 14+ is required.
+The installer builds the release executable for your Mac and copies only that
+program to `~/.local/bin/appscope`. It does not register a service, change PATH,
+or create configuration. `setup` creates a private empty configuration if needed,
+preserves existing settings, and prints MCP connection JSON. `doctor` checks local
+setup without contacting Apple.
 
-`APPSCOPE_PREFIX=/your/prefix ./scripts/install.sh` changes the install location.
-The default is `~/.local/bin/appscope`; add that folder to PATH if desired.
+To use `appscope` without its absolute path in the current Terminal session:
 
-To update, review/pull a new version in the checkout and rerun the installer.
-Remove the installed executable to uninstall; configuration/history stay intact.
-Delete the AppScope data directory only if you also want to remove all history.
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+You can add that line to your own shell configuration for future sessions.
+For a custom install directory, set `APPSCOPE_PREFIX` when running the installer;
+the program goes into that prefix's `bin` directory. This does not change the
+data directory. Use a writable prefix without `sudo`.
 
 ## Install a compiled release
 
-Extract the macOS universal archive and run its `install.sh`. It installs only
-`appscope`, supporting both Apple Silicon and Intel. Run `appscope setup` using
-the installed absolute path. Use signed/notarized public releases when available.
-An ad-hoc development build is not a notarized public release. Do not disable
-Gatekeeper as an installation step.
+Public download URLs are not available yet. Once a release is published, download
+its matching `.tar.gz` archive and `.sha256` file from the same official release.
+In that download directory, the v0.1.0 filenames would be:
 
-A public GitHub release and Homebrew tap are not created by a local build. The
-maintainer's publishing steps are in [RELEASING.md](RELEASING.md).
+```sh
+shasum -a 256 -c appscope-0.1.0-macos-universal.tar.gz.sha256
+tar -xzf appscope-0.1.0-macos-universal.tar.gz
+cd appscope-0.1.0-macos-universal
+./install.sh
+"$HOME/.local/bin/appscope" setup
+"$HOME/.local/bin/appscope" doctor
+```
 
-## Connect the agent
+Check that the checksum command reports `OK` before extracting. A checksum detects
+file mismatch; obtain it from the trusted release alongside its signing status.
+The archive includes the universal Apple Silicon/Intel executable, installer,
+handbook, examples and licenses. Keep that extracted documentation if useful; the
+installer copies only the executable. End users need no Swift compiler or Python.
 
-`appscope setup` prints the complete MCP configuration with the actual executable
-path. Copy it into your host's MCP configuration. The shape is:
+An ad-hoc local build is not a Developer ID signed/notarized public release.
+Do not disable Gatekeeper as an install step. See [troubleshooting](TROUBLESHOOTING.md)
+if macOS blocks the download. Homebrew installation instructions will be added
+when an actual tap is published; formula-generation support alone is not a tap.
+
+## Connect an MCP host
+
+Run `appscope setup` using the installed executable and copy the JSON connection
+it prints into your host's MCP settings. Merge the AppScope entry with existing
+servers instead of overwriting them. The conventional JSON shape is:
 
 ```json
 {
@@ -52,69 +79,65 @@ path. Copy it into your host's MCP configuration. The shape is:
 }
 ```
 
-For hosts with a different configuration format, use the same command and args.
-Set a tool timeout of at least 120 seconds for ranking batches, and longer for
-initial Apple analytics imports. Enable only the tools you want the agent to use.
-MCP results distinguish local writes (tracking/history) from read-only calls.
-No MCP tool can modify Apple metadata, create campaigns, or spend money.
+The command above is a placeholder; use the absolute path printed by `setup`.
+Some hosts use a settings form or another file format: the executable and `serve`
+argument are the same. Consult that host's current MCP instructions for where to
+put them. Never add credentials or private-key contents to the connection JSON.
 
-## Public data first
+Restart the connection, confirm that it exposes 16 tools, and call `setup_status`.
+`configured_unverified` means required credential strings are present, not that
+Apple access was checked. Start with `search_apps` for a public live check.
 
-No credentials are needed for `search_apps`, `app_profile`, `analyze_keyword`, or
-keyword tracking/history. Discover your numeric app ID from `search_apps`; check
-the returned title, developer and URL before tracking it. Save an app brief and
-choose a country (default `us`). Rankings start from selected/discovered terms,
-not an exhaustive list of every term an app ranks for.
+Use a host tool timeout of at least 120 seconds for ranking batches and allow
+longer for initial analytics imports. Smaller batches help hosts with shorter
+timeouts. Host tool permissions can restrict which capabilities the agent uses.
+MCP annotations distinguish local changes, but even read-only tools may return
+private account data to the host.
 
-## Apple credentials
+### Custom data/configuration paths
 
-Setup creates an empty, owner-readable `config.json` in
-`~/Library/Application Support/AppScope`. Edit that local file, never a source
-file or MCP prompt. Keys must be P-256 PEM files with mode 0600 and live outside
-the Git checkout. Configuration stores paths to the private keys, not their bytes.
-Tokens and JWTs remain in memory and are not logged or saved in the database.
+`APPSCOPE_DATA_DIR` changes local storage and the default config path.
+`APPSCOPE_CONFIG` changes only the configuration file path. Use absolute paths
+and set the same environment in the host. `setup` prints an `env` block when run
+with these overrides. Config variables set only in Terminal might not reach a
+GUI host. See the [full configuration reference](CLI.md).
 
-```sh
-chmod 600 /absolute/path/to/private-key.p8
-```
+Default private files live under `~/Library/Application Support/AppScope`.
+Add optional providers using the [Apple credential guide](CREDENTIALS.md).
 
-Override the data directory with `APPSCOPE_DATA_DIR` and the configuration file
-with `APPSCOPE_CONFIG`. Set the same environment in the MCP host if using overrides.
+## Update or move the installation
 
-### Apple Ads
+1. Read the new release notes and back up local data if the data format changes.
+2. Stop the host's AppScope connection so it does not keep an older process running.
+3. Review/check out the intended source version and rerun the source installer,
+   or verify and run the new archive's installer with the same prefix.
+4. Confirm `appscope --version`, then restart the host connection.
+5. Run `doctor` and a small tool call. Config/history are preserved by the installer.
 
-An Apple Ads account administrator must grant API access. Prefer an **API Account
-Read Only** user. Generate a P-256 key locally, give Apple the public key, and keep
-the private key local. Account Settings → API supplies client ID, team ID and key
-ID. Add the **Platform API ad account ID**; it is not assumed to be the legacy org ID.
+If the executable path changes, rerun the new executable's `setup` and update the
+host connection. Do not assume Homebrew, source and archive installs resolve to
+the same binary: check `command -v appscope` and use an explicit path.
 
-Fill in the local `apple_ads` object: `client_id`, `team_id`, `key_id`,
-`ad_account_id`, and `private_key_path`. Then call `keyword_suggestions` for an app
-to validate access. No campaign or ad spend is created by AppScope.
+## Backup and restore
 
-See [Apple's API setup documentation](https://ads.apple.com/maps/apple-ads/help/campaigns/0022-use-apple-ads-platform-api).
+Stop **all** AppScope processes/host connections before copying data. Copy the
+entire configured data directory, including any SQLite `-wal` and `-shm` files,
+to your normal secure backup location. Also back up an external config file and
+private keys stored outside that directory. Backups contain private app context
+and account data; do not put them in a public repository.
 
-### App Store Connect
+To restore, keep the server stopped, preserve the current directory separately,
+and restore a complete consistent backup into the chosen data location. Check
+config/key paths and permissions (0600 for config, keys and database; 0700 for
+the data directory), then run `doctor` and inspect `list_apps`/`keyword_history`.
+Moving to a new Mac may require updating absolute key paths in the local config.
+A future schema change may prevent older binaries reading newer data; consult
+the matching release notes before downgrading.
 
-Create a team API key and fill in the local `app_store_connect` object:
-`issuer_id`, `key_id`, and `private_key_path`. Keep this separate from the Apple
-Ads key. Use a **Sales and Reports** key for routine analytics downloads.
+## Uninstall
 
-An **Admin** key is required once to create ongoing report requests. With an
-Admin key configured locally, run:
-
-```sh
-appscope enable-reports NUMERIC_APP_ID --confirm
-```
-
-Then switch to the Sales and Reports key for ordinary use. The enablement command
-is idempotent for an existing active ongoing request and is not exposed through
-MCP. Apple's first reports may take 24–48 hours. Call `app_performance` to sync.
-Stopped requests need to be re-enabled. Data is cached so repeated reads work
-offline; reports show the last import status and data coverage.
-
-See [Apple's role and report guidance](https://developer.apple.com/documentation/appstoreconnectapi/downloading-analytics-reports).
-
-`doctor` reports configuration presence, not successful account authentication.
-Successful live tool calls are the account access check. Report schema/auth flows
-have automated fixture coverage; your account still needs live qualification.
+Remove the AppScope entry from the host and stop its process. Remove only the
+installed `appscope` executable from the prefix you chose. The installer creates
+no login item or background service to remove. Local data and credential files
+remain intact; delete those separately only if you intend to discard them.
+Uninstalling does not revoke keys in Apple accounts.

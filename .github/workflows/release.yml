@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: swift test
+      - name: Documentation schemas, examples and links
+        run: swift run appscope-docs --check
       - name: Package
         run: ./scripts/package-macos.sh
       - uses: actions/upload-artifact@v4
@@ -18,6 +20,6 @@ jobs:
           path: |
             dist/*.tar.gz
             dist/*.sha256
-# This workflow creates an unsigned release candidate only. Developer ID signing,
+# This workflow creates an ad-hoc signed development candidate only. Developer ID signing,
 # notarization, public release upload and tap updates are explicit maintainer steps.
 # Never commit signing identities' private keys, certificates, or Apple credentials.

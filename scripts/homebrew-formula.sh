@@ -18,7 +18,8 @@ class Appscope < Formula
 
   def install
     bin.install "appscope"
-    doc.install "README.md"
+    doc.install "README.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSE"
+    doc.install "docs", "examples", "licenses"
   end
 
   test do

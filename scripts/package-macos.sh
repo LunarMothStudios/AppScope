@@ -6,13 +6,14 @@ cd "$repo_root"
 if [[ -d /Applications/Xcode.app/Contents/Developer && -z "${DEVELOPER_DIR:-}" ]]; then
   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 fi
+swift run appscope-docs --check
 swift build -c release --arch arm64 --arch x86_64 --product appscope
 binary_dir="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)"
 version="$("$binary_dir/appscope" --version)"
 staging="$repo_root/dist/appscope-$version-macos-universal"
 mkdir -p "$staging/licenses"
 install -m 755 "$binary_dir/appscope" "$staging/appscope"
-cp LICENSE README.md SECURITY.md CONTRIBUTING.md "$staging/"
+cp LICENSE README.md SECURITY.md CONTRIBUTING.md CHANGELOG.md "$staging/"
 cp -R docs examples "$staging/"
 cp scripts/install-binary.sh "$staging/install.sh"
 for dependency in .build/checkouts/*; do
