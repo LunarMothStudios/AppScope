@@ -6,9 +6,12 @@ planning app; use your own verified app ID and relevant terms.
 
 ## 1. Install and confirm the executable
 
-From a source checkout:
+Open Terminal on a Mac with Swift 6+ and a macOS SDK installed. Download the
+source and install it:
 
 ```sh
+git clone https://github.com/LunarMothStudios/AppScope.git
+cd AppScope
 ./scripts/install.sh
 "$HOME/.local/bin/appscope" setup
 "$HOME/.local/bin/appscope" doctor

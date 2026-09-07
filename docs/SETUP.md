@@ -8,12 +8,15 @@ For your first app and report, follow [getting started](GETTING-STARTED.md).
 
 ## Install from source
 
-Get the AppScope source from its official repository once published and enter
-that checkout. Building requires Swift 6+ and a macOS SDK. The installer selects
+The [official GitHub repository](https://github.com/LunarMothStudios/AppScope)
+is available now. Open Terminal and run the commands below to download and
+install it. Building requires Swift 6+ and a macOS SDK. The installer selects
 full Xcode at `/Applications/Xcode.app/Contents/Developer` when available; otherwise
 use matching Command Line Tools. Dependency resolution needs network access.
 
 ```sh
+git clone https://github.com/LunarMothStudios/AppScope.git
+cd AppScope
 ./scripts/install.sh
 "$HOME/.local/bin/appscope" setup
 "$HOME/.local/bin/appscope" doctor

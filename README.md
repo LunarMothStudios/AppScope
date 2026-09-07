@@ -41,21 +41,37 @@ into a briefing and possible next steps.
 
 ## First flight
 
-### 1 · Install from your source checkout
+### 1 · Install AppScope on your Mac
 
-You’ll need Swift 6+ and a macOS SDK to build from source.
+**Available today: install from GitHub source.** You need macOS 14+ and Apple’s
+developer tools with Swift 6+ and a macOS SDK (for example, a compatible Xcode
+installation). This version compiles on your Mac; there is no Homebrew command
+or ready-to-download public binary yet.
+
+Open **Terminal**, then copy and run:
 
 ```sh
+git clone https://github.com/LunarMothStudios/AppScope.git
+cd AppScope
 ./scripts/install.sh
 "$HOME/.local/bin/appscope" setup
 "$HOME/.local/bin/appscope" doctor
 ```
 
-`setup` prints the MCP connection settings with your actual installed path. Add
-them to an agent host that supports local **stdio MCP servers**. Your agent can
-then discover all 24 tools.
+The installer puts the program at `~/.local/bin/appscope`. You do not need to
+keep a Terminal window running afterward.
 
-> **Release status:** This is a local **v0.2.0 preview**. Public GitHub downloads,
+**Connect it to your agent:** `setup` prints your exact MCP configuration. In your
+agent’s MCP settings, add a local **stdio** server using the printed executable
+path as the **command** and `serve` as its **argument**. If your host uses a JSON
+configuration file, merge the printed `appscope` entry into its existing servers.
+Reload the connection, then ask: **“Call AppScope’s setup_status.”**
+
+Installation puts the tool on your Mac; this connection step makes its 24 tools
+available to your agent. AppScope does not register itself in your host.
+[Detailed connection instructions](docs/SETUP.md#connect-an-mcp-host)
+
+> **Release status:** The source is on GitHub. **v0.2.0 compiled downloads**,
 > a Homebrew tap, and Developer ID notarization are still pending. Compiled
 > universal archives target macOS 14+ and need no Swift, Xcode, or Python on the
 > receiving Mac. [Installation options](docs/SETUP.md) · [Verified so far](docs/VALIDATION.md)
