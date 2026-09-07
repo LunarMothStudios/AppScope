@@ -1,35 +1,49 @@
-# AppScope
+<div align="center">
+  <img src="assets/branding/appscope-moth-scout-v1.png" width="240" alt="Scout, AppScope’s mint-green moth mascot wearing oversized scout goggles">
+  <h1>AppScope</h1>
+  <p><strong>Give your agent eyes on the App Store.</strong></p>
+  <p>Keyword discovery. Competitor context. Your next ASO experiment.</p>
+  <p><code>Swift</code> &nbsp; <code>macOS 14+</code> &nbsp; <code>24 MCP tools</code> &nbsp; <code>MIT licensed</code></p>
+  <p>
+    <a href="docs/GETTING-STARTED.md">Get started</a> &nbsp; · &nbsp;
+    <a href="docs/TOOLS.md">Explore the tools</a> &nbsp; · &nbsp;
+    <a href="docs/README.md">Read the handbook</a>
+  </p>
+</div>
 
-**App intelligence for your AI agent.** An open-source Swift MCP server for macOS.
+---
 
-Ask your agent how your apps are doing, where they appear for selected keywords,
-who competes with them, and what ASO experiments to try next. AppScope collects
-the evidence and remembers changes. You read the answer in your agent—there is
-no dashboard or extra app to open.
+## Your apps have a story. Scout helps you read it.
 
-[Get started](docs/GETTING-STARTED.md) · [Documentation](docs/README.md) ·
-[Tool reference](docs/TOOLS.md) · [Contribute](CONTRIBUTING.md)
+**AppScope is an open-source Swift MCP server for your Mac.** It gives your AI
+agent app metadata, observed keyword positions, competitor evidence, and local
+history to help answer the questions behind your next release.
 
-## What you get
+You ask. Scout gathers the evidence. Your agent connects the dots.
 
-| Capability | Data and requirements |
-|---|---|
-| App understanding | Public metadata plus your saved purpose, intended audiences and differentiators; no credentials |
-| Keyword tracking | Observed search positions by app/country, competitors and local history; no credentials |
-| Competition estimates | Explained top-result rating counts and title matches; no credentials |
-| Keyword ideas and demand | Apple suggestions and available popularity; your Apple Ads API credentials |
-| App performance | Available downloads, engagement, sales/proceeds and date coverage; your App Store Connect API credentials and enabled reports |
-| Before/after experiments | Record changes, preserve baselines and compare equal periods with explicit gaps |
-| Reliable daily refresh | One resumable workflow, source freshness, 7/30-day trends and change candidates |
-| ASO and daily reports | Cached evidence and provisional experiments; your agent reasons, schedules and delivers the report |
+> “Where does my app show up? Who’s ahead of it? What should I try next?”
 
-AppScope runs locally, stores history in SQLite, and uses your own credentials
-when needed. There is no AppScope subscription, hosted backend, telemetry or LLM
-API key. The code is [MIT licensed](LICENSE).
+Everything stays in your agent’s workflow. No extra dashboard to check, no
+AppScope subscription, and no separate LLM API key. History lives locally in
+SQLite; account data uses your own credentials.
 
-## Quick start on a Mac
+## A little scout. A useful toolkit.
 
-From an AppScope source checkout, with Swift 6+ and a macOS SDK:
+| 🔎 Find your footing | 🦋 Watch the neighborhood | 🧪 Learn from changes |
+|---|---|---|
+| Find your app and understand its purpose | See competing apps for each keyword | Record ASO experiments and preserve baselines |
+| Test keywords and record observed positions | Inspect explained competition estimates | Compare equal before/after periods |
+| Keep app and audience context for your agent | Follow 7/30-day keyword and competitor trends | See missing data before drawing conclusions |
+
+**With Apple account access**, add available keyword popularity and suggestions,
+plus downloads, engagement, sales and proceeds. Your agent turns that evidence
+into a briefing and possible next steps.
+
+## First flight
+
+### 1 · Install from your source checkout
+
+You’ll need Swift 6+ and a macOS SDK to build from source.
 
 ```sh
 ./scripts/install.sh
@@ -37,58 +51,95 @@ From an AppScope source checkout, with Swift 6+ and a macOS SDK:
 "$HOME/.local/bin/appscope" doctor
 ```
 
-`setup` prints MCP settings with the actual installed path. Add that connection
-to a host that launches local stdio MCP servers. Your agent will discover 24 tools.
-Public app searches work immediately; Apple credentials are optional.
+`setup` prints the MCP connection settings with your actual installed path. Add
+them to an agent host that supports local **stdio MCP servers**. Your agent can
+then discover all 24 tools.
 
-For a direct first call:
+> **Release status:** This is a local **v0.2.0 preview**. Public GitHub downloads,
+> a Homebrew tap, and Developer ID notarization are still pending. Compiled
+> universal archives target macOS 14+ and need no Swift, Xcode, or Python on the
+> receiving Mac. [Installation options](docs/SETUP.md) · [Verified so far](docs/VALIDATION.md)
+
+### 2 · Give your agent a mission
+
+Copy this into your connected agent:
+
+> Find my app and verify its developer. Save a brief about what it does and whom
+> it helps. Explore relevant US keywords and show which ones actually return my
+> app, its observed position, and the leading competitors. Track the useful terms.
+> Suggest up to three ASO experiments, explaining the evidence and what’s missing.
+
+Prefer a quick Terminal check?
 
 ```sh
 "$HOME/.local/bin/appscope" call search_apps '{"query":"your app name","country":"us","limit":5}'
 ```
 
-Replace the search phrase, then verify the app's developer and URL. The
-[first-run walkthrough](docs/GETTING-STARTED.md) takes you from that result to an
-app brief, keyword tracking and your first report.
+Replace the phrase, then verify the developer and app URL.
+The [first-run walkthrough](docs/GETTING-STARTED.md) covers the rest.
 
-Compiled universal archives need **macOS 14+**, with no compiler, Xcode or Python
-on the user's Mac. This is currently a **local v0.2.0 preview**: public GitHub
-downloads, a Homebrew tap and Developer ID notarization still need publication/
-qualification. No public install URL is claimed yet. See [installation](docs/SETUP.md)
-and the [validation record](docs/VALIDATION.md).
+### 3 · Connect the data you want
 
-## Ask your agent
+Public app and keyword searches work immediately. Add account access when you
+want a fuller picture:
 
-> Find my app and verify its developer. Save a brief about what it does and whom
-> it helps. Track 20 relevant US keywords. Show my observed position, competing
-> apps, any available popularity, and three ASO experiments worth investigating.
-> Explain the dates and gaps in the evidence.
+| You want to know… | What AppScope needs |
+|---|---|
+| Where does my app appear for this keyword? | Nothing extra—public search |
+| Which apps compete with it? | Nothing extra—public search |
+| What keywords does Apple suggest, and how popular are they? | Your Apple Ads API credentials; scores are not guaranteed for every term |
+| How are downloads, engagement and sales doing? | Your App Store Connect API credentials and available, enabled analytics reports |
 
-For recurring use, give your host the [daily job template](examples/hex-daily-job.md).
-The job uses `refresh_app` to collect data with saved checkpoints and return a briefing. Installing
-AppScope does not create a scheduler or enable a Hex job.
+Run guided credential setup **in your Terminal**, keeping private keys out of chat:
 
-## Understand the evidence
+```sh
+"$HOME/.local/bin/appscope" configure apple-ads
+"$HOME/.local/bin/appscope" configure app-store-connect
+```
 
-- **Rank is observed iTunes Search API order.** It has not been validated against
-  device App Store results. Missing means absent from the returned results, not
-  rank 201. AppScope tracks selected terms, not every keyword an app ranks for.
-- **Competition is an estimate.** Popularity comes from Apple when supplied;
-  unknown scores remain unknown. Audience ideas are hypotheses, not demographics.
-- **Performance has coverage limits.** Missing is not zero, reporting dates can
-  lag, and Apple's conversion rate is unavailable in v0.2. Account adapters have
-  automated fixture coverage and await live qualification with account access.
+Configure whichever provider you need. These use Apple API credentials, not
+Sign in with Apple. Follow the [credential guide](docs/CREDENTIALS.md), then restart
+your MCP connection and ask your agent to check access.
 
-No MCP tool edits live listings or campaigns or spends money. Read the
-[data contract](docs/DATA-CONTRACT.md), [response guide](docs/RESPONSES.md) and
-[security model](SECURITY.md) before relying on an automated report.
+## Tomorrow, bring the receipts
 
-## Documentation and development
+Give your host the [daily job template](examples/hex-daily-job.md) to schedule a
+briefing. `refresh_app` collects evidence, saves checkpoints, and returns a report
+with source freshness and available trends. Interrupted work can resume on the
+same UTC date.
 
-The [handbook](docs/README.md) covers credentials, CLI/configuration, every tool,
-ASO workflows, troubleshooting, architecture and releases. Agent integrations can
-use the [JSON tool catalog](examples/tool-catalog.json),
-[synthetic calls](examples/tool-calls.json) and [reading index](docs/llms.txt).
+Your agent can tell you what moved, which competitors appeared, and which
+experiments have enough history to compare. **Your host handles scheduling and
+report delivery**—installing AppScope doesn’t enable a Hex job or continuous scanning.
+
+## Clear eyes about the data
+
+Good decisions need honest measurements.
+
+- **Positions are observed iTunes Search API order.** They are not verified device
+  App Store rankings. “Not found” means absent from the returned results, not rank 201.
+- **Discovery tests candidate keywords.** AppScope has no exhaustive index of every
+  keyword an app ranks for. It tracks up to 100 terms per app/country.
+- **Competition is an estimate; popularity is separate.** Unknown scores stay unknown.
+  Audience ideas are hypotheses, not measured demographics.
+- **Missing performance is not zero.** Reports can lag or have gaps. Apple’s
+  conversion rate is unavailable in v0.2; authenticated adapters await live account
+  qualification. Before/after differences do not prove causation.
+
+No MCP tool changes live listings or campaigns or spends money.
+[Data contract and limits](docs/DATA-CONTRACT.md) · [Response guide](docs/RESPONSES.md) · [Security](SECURITY.md)
+
+## Pick your next trail
+
+| Start here | Go deeper |
+|---|---|
+| [First report walkthrough](docs/GETTING-STARTED.md) | [Every MCP tool](docs/TOOLS.md) |
+| [Installation and updates](docs/SETUP.md) | [Response shapes and data gaps](docs/RESPONSES.md) |
+| [Apple credentials](docs/CREDENTIALS.md) | [Architecture](docs/ARCHITECTURE.md) |
+| [Frequently asked questions](docs/FAQ.md) | [Changelog](CHANGELOG.md) |
+
+<details>
+<summary><strong>Building with Scout? Developer and agent resources</strong></summary>
 
 ```sh
 swift build
@@ -96,10 +147,21 @@ swift test
 swift run appscope-docs --check
 ```
 
-The docs check validates generated schemas, all 24 examples and relative file
-links. Use full Xcode's developer directory if the selected Command Line Tools
-cannot run the tests. See [contributing](CONTRIBUTING.md),
-[release packaging](docs/RELEASING.md) and [changelog](CHANGELOG.md).
+The documentation check validates generated schemas, all 24 synthetic examples,
+fenced JSON and relative documentation file links. Use full Xcode’s developer
+directory if the selected Command Line Tools cannot run the tests.
 
-Built with the official [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk),
-Foundation, CryptoKit, SQLite and zlib. Not affiliated with Apple.
+- [Contributing](CONTRIBUTING.md) and [release packaging](docs/RELEASING.md)
+- [JSON tool catalog](examples/tool-catalog.json) and [synthetic calls](examples/tool-calls.json)
+- [Agent reading index](docs/llms.txt) and [complete handbook](docs/README.md)
+
+</details>
+
+---
+
+<div align="center">
+  <p><strong>Stay curious. Track the evidence. Try something useful.</strong></p>
+  <p>Built with Swift, Foundation, CryptoKit, SQLite, zlib, and the official
+    <a href="https://github.com/modelcontextprotocol/swift-sdk">MCP Swift SDK</a>.</p>
+  <p><a href="LICENSE">MIT licensed</a> · Runs locally · No telemetry · Not affiliated with Apple</p>
+</div>
