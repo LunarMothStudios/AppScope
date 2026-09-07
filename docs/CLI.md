@@ -1,6 +1,6 @@
 # CLI and configuration reference
 
-The installed program is `appscope`. These commands match v0.2.0. There is no
+The installed program is `appscope`. These commands match v0.0.2-alpha. There is no
 interactive GUI, `--json` flag, HTTP server mode, or built-in scheduler.
 
 ## Commands

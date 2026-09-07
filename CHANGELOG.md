@@ -4,7 +4,12 @@ Changes to AppScope are recorded here. Version numbers describe the executable,
 MCP tools and data behavior together. Preview releases may change these contracts;
 check release notes before updating and back up private local data.
 
-## 0.2.0 — local preview, not yet published
+## 0.0.2-alpha — 2026-09-07
+
+First public alpha. This release names the previously local 0.2.0 development
+preview as 0.0.2-alpha; existing local data is retained. Includes Scout branding
+and complete installation/MCP connection instructions. The universal download
+is ad-hoc signed, not Developer ID signed or notarized.
 
 - Added `refresh_app` and `refresh_status`: ordered collection, durable checkpoints,
   fixed keyword selections, resumable bounded requests, per-app/country OS locks

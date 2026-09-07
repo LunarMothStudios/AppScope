@@ -1,5 +1,15 @@
 # Local validation
 
+## Public alpha candidate — 2026-09-07
+
+Version 0.0.2-alpha names the previously local 0.2.0 feature set for the first
+public release. All 35 tests passed again with the alpha version, including the
+real MCP subprocess test. Generated docs and examples passed validation. The
+archive targets Intel and Apple Silicon on macOS 14+. It is ad-hoc signed, not
+Developer ID signed or notarized. Prior live public-data evidence and remaining
+account/device/Intel runtime gates below still apply.
+
+
 ## v0.2.0 — 2026-09-06
 
 Verified locally on an Apple Silicon Mac with Swift 6.3.3 and the Xcode macOS SDK.

@@ -2,7 +2,7 @@
 
 This guide is for maintainers. Building locally or running CI does not publish
 a repository, release or Homebrew tap. There is no Python/npm package to publish.
-The current v0.2.0 artifacts are local development builds; see
+The v0.0.2-alpha release uses an ad-hoc development signature; see
 [validation status](VALIDATION.md).
 
 ## 1. Prepare a reviewable source release
@@ -41,8 +41,8 @@ is temporary and recreated for each build. It builds both `arm64` and `x86_64`, 
 single executable, includes the handbook/examples/licenses and produces:
 
 ```text
-dist/appscope-0.2.0-macos-universal.tar.gz
-dist/appscope-0.2.0-macos-universal.tar.gz.sha256
+dist/appscope-0.0.2-alpha-macos-universal.tar.gz
+dist/appscope-0.0.2-alpha-macos-universal.tar.gz.sha256
 ```
 
 Names follow the executable's version. Run `shasum -a 256 -c` on the checksum file
@@ -87,7 +87,7 @@ artifacts only; they do not use signing secrets or upload a public release.
 ## 4. Publish matching source and artifacts
 
 Publish the reviewed source to the chosen repository, tag the verified commit
-as `v0.2.0` (or its actual version), and create a GitHub Release for that tag.
+as `v0.0.2-alpha` (or its actual version), and create a GitHub Release for that tag.
 Upload the exact archive and checksum verified above. Signing/rebuilding changes
 the artifact; if either happens, re-check the new archive and checksum together.
 
@@ -108,7 +108,7 @@ Replace `OWNER` and `/absolute/path/to/homebrew-tap` with the actual destination
 its `Formula` directory must already exist:
 
 ```sh
-./scripts/homebrew-formula.sh https://github.com/OWNER/AppScope/releases/download/v0.2.0/appscope-0.2.0-macos-universal.tar.gz dist/appscope-0.2.0-macos-universal.tar.gz > /absolute/path/to/homebrew-tap/Formula/appscope.rb
+./scripts/homebrew-formula.sh https://github.com/OWNER/AppScope/releases/download/v0.0.2-alpha/appscope-0.0.2-alpha-macos-universal.tar.gz dist/appscope-0.0.2-alpha-macos-universal.tar.gz > /absolute/path/to/homebrew-tap/Formula/appscope.rb
 ```
 
 The generator checks the versioned filename against the archive's `VERSION` marker

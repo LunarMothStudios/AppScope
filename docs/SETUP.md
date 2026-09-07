@@ -41,14 +41,16 @@ data directory. Use a writable prefix without `sudo`.
 
 ## Install a compiled release
 
-Public download URLs are not available yet. Once a release is published, download
-its matching `.tar.gz` archive and `.sha256` file from the same official release.
-In that download directory, the v0.2.0 filenames would be:
+Download the `.tar.gz` archive and `.sha256` file from the official
+[v0.0.2-alpha release](https://github.com/LunarMothStudios/AppScope/releases/tag/v0.0.2-alpha).
+This alpha is ad-hoc signed, not Developer ID signed or notarized; macOS may block
+the downloaded executable. Do not disable Gatekeeper. Source installation above
+is an alternative. In Terminal, enter the folder containing the downloads, then run:
 
 ```sh
-shasum -a 256 -c appscope-0.2.0-macos-universal.tar.gz.sha256
-tar -xzf appscope-0.2.0-macos-universal.tar.gz
-cd appscope-0.2.0-macos-universal
+shasum -a 256 -c appscope-0.0.2-alpha-macos-universal.tar.gz.sha256
+tar -xzf appscope-0.0.2-alpha-macos-universal.tar.gz
+cd appscope-0.0.2-alpha-macos-universal
 ./install.sh
 "$HOME/.local/bin/appscope" setup
 "$HOME/.local/bin/appscope" doctor

@@ -43,10 +43,15 @@ into a briefing and possible next steps.
 
 ### 1 · Install AppScope on your Mac
 
-**Available today: install from GitHub source.** You need macOS 14+ and Apple’s
-developer tools with Swift 6+ and a macOS SDK (for example, a compatible Xcode
-installation). This version compiles on your Mac; there is no Homebrew command
-or ready-to-download public binary yet.
+**Download the [v0.0.2-alpha Mac release](https://github.com/LunarMothStudios/AppScope/releases/tag/v0.0.2-alpha)** for Apple Silicon or Intel, macOS 14+. No compiler or Python required.
+
+Download the `.tar.gz` archive and its `.sha256` file, then follow the
+[compiled installation steps](docs/SETUP.md#install-a-compiled-release).
+**This alpha is ad-hoc signed and not notarized; macOS may block the downloaded
+executable.** Source installation below is also available. Do not disable Gatekeeper.
+
+**Build from source instead:** you need Swift 6+ and a macOS SDK, such as a
+compatible Xcode installation.
 
 Open **Terminal**, then copy and run:
 
@@ -71,10 +76,8 @@ Installation puts the tool on your Mac; this connection step makes its 24 tools
 available to your agent. AppScope does not register itself in your host.
 [Detailed connection instructions](docs/SETUP.md#connect-an-mcp-host)
 
-> **Release status:** The source is on GitHub. **v0.2.0 compiled downloads**,
-> a Homebrew tap, and Developer ID notarization are still pending. Compiled
-> universal archives target macOS 14+ and need no Swift, Xcode, or Python on the
-> receiving Mac. [Installation options](docs/SETUP.md) · [Verified so far](docs/VALIDATION.md)
+> **Alpha release:** Expect rough edges. Homebrew and Developer ID notarization
+> are still pending. [Installation options](docs/SETUP.md) · [Validation](docs/VALIDATION.md)
 
 ### 2 · Give your agent a mission
 

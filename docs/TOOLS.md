@@ -1,6 +1,6 @@
 # MCP tool reference
 
-Generated from `ToolCatalog.all` for AppScope 0.2.0. Run
+Generated from `ToolCatalog.all` for AppScope 0.0.2-alpha. Run
 `swift run appscope-docs` to regenerate; `swift run appscope-docs --check`
 validates this page, the JSON catalog, examples, fenced JSON and relative file links.
 

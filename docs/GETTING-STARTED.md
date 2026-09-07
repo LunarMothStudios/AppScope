@@ -46,7 +46,7 @@ Ask the agent:
 
 > Call AppScope's setup_status and list its available tools.
 
-Expect 24 tools in v0.2.0. If the host cannot launch local stdio programs, it cannot
+Expect 24 tools in v0.0.2-alpha. If the host cannot launch local stdio programs, it cannot
 connect directly to this server. See [connection troubleshooting](TROUBLESHOOTING.md).
 Starting `appscope serve` yourself in Terminal looks quiet because it waits for
 MCP messages on standard input. That is not an installation test; use `doctor`.

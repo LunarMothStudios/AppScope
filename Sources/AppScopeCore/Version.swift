@@ -1,3 +1,3 @@
 import MCP
 
-public let appScopeVersion = "0.2.0"
+public let appScopeVersion = "0.0.2-alpha"

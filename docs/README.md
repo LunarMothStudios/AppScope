@@ -28,11 +28,10 @@ reasoning, scheduling, and the place where you read the report.
 
 ## Current release status
 
-AppScope 0.2.0 is a working local preview. Public app search and the MCP workflow
-have been exercised live. Apple account adapters have deterministic test coverage
-but await authenticated qualification. A universal Mac archive can be built;
-public GitHub/Homebrew publication and Developer ID notarization are separate
-release steps. No published download URL or Homebrew tap is claimed yet.
+AppScope [0.0.2-alpha](https://github.com/LunarMothStudios/AppScope/releases/tag/v0.0.2-alpha)
+is the first public alpha, including a universal Mac archive. It is ad-hoc signed,
+not notarized. Homebrew remains pending. Public app search and MCP have been
+exercised live; account adapters await authenticated qualification.
 
 The [tool catalog](../examples/tool-catalog.json) and
 [example calls](../examples/tool-calls.json) are machine-readable. The
